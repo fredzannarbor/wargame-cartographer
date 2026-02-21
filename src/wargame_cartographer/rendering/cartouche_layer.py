@@ -263,9 +263,9 @@ def _draw_legend(ax, context, x_max, y_min, width, height):
     if not terrains_present:
         return
 
-    # Legend box — compact with 2x smaller fonts
-    legend_w = width * 0.14
-    row_h = height * 0.015
+    # Legend box — readable, proportionate fonts
+    legend_w = width * 0.18
+    row_h = height * 0.022
     legend_h = row_h * (len(terrains_present) + 1.5)
     lx = x_max - width * 0.02 - legend_w
     ly = y_min + height * 0.04
@@ -284,7 +284,7 @@ def _draw_legend(ax, context, x_max, y_min, width, height):
     ax.text(
         lx + legend_w * 0.5, ly + legend_h - row_h * 0.3,
         "TERRAIN EFFECTS",
-        fontsize=3.0, fontweight="bold", ha="center", va="top",
+        fontsize=5.0, fontweight="bold", ha="center", va="top",
         fontfamily="sans-serif", zorder=10,
     )
 
@@ -294,12 +294,12 @@ def _draw_legend(ax, context, x_max, y_min, width, height):
         if effects is None:
             continue
 
-        y_pos = ly + legend_h - row_h * 1.2 - i * row_h
+        y_pos = ly + legend_h - row_h * 1.3 - i * row_h
         color = style.terrain_colors.get(terrain, "#CCCCCC")
 
         # Color swatch
         swatch = Rectangle(
-            (lx + legend_w * 0.05, y_pos - row_h * 0.3),
+            (lx + legend_w * 0.04, y_pos - row_h * 0.3),
             legend_w * 0.08, row_h * 0.6,
             facecolor=color,
             edgecolor="#333333",
@@ -311,9 +311,9 @@ def _draw_legend(ax, context, x_max, y_min, width, height):
         # Terrain name + movement cost
         label = f"{terrain.value.capitalize()}  MP:{effects.movement_cost}  Def:{effects.defensive_modifier:+d}"
         ax.text(
-            lx + legend_w * 0.18, y_pos,
+            lx + legend_w * 0.16, y_pos,
             label,
-            fontsize=2.0, va="center", ha="left",
+            fontsize=4.0, va="center", ha="left",
             fontfamily="sans-serif", zorder=10,
         )
 

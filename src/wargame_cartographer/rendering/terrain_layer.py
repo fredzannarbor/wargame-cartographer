@@ -20,23 +20,39 @@ from wargame_cartographer.terrain.types import TerrainType
 def _build_coastal_data(context: RenderContext):
     """Build projected land+lake polygons for coastal contour rendering.
 
+    Clips global Natural Earth polygons to the map bbox BEFORE projecting,
+    then projects the clipped geometry to the grid CRS.
+
     Returns (land_proj, lake_proj) as shapely geometries in projected CRS,
     or (None, None) if vector data is unavailable.
     """
     if context.vector_data is None:
         return None, None
 
+    bbox = context.spec.bbox
     transformer = context.grid._to_proj
 
-    def _project_gdf(gdf):
-        """Project a GeoDataFrame's geometries to the grid CRS."""
+    # Build a bbox polygon in WGS84 for clipping (with small buffer)
+    from shapely.geometry import box as shapely_box
+    clip_box = shapely_box(
+        bbox.min_lon - 0.5, bbox.min_lat - 0.5,
+        bbox.max_lon + 0.5, bbox.max_lat + 0.5,
+    )
+
+    def _clip_and_project_gdf(gdf):
+        """Clip GeoDataFrame to bbox in WGS84, then project to grid CRS."""
         polys = []
         for _, row in gdf.iterrows():
             geom = row.geometry
             if geom is None:
                 continue
             try:
-                projected = _project_polygon(geom, transformer)
+                # Clip to bbox in WGS84 first
+                clipped = geom.intersection(clip_box)
+                if clipped.is_empty:
+                    continue
+                # Now project the clipped geometry
+                projected = _project_polygon(clipped, transformer)
                 if projected is not None and projected.is_valid and not projected.is_empty:
                     polys.append(projected)
             except Exception:
@@ -52,10 +68,10 @@ def _build_coastal_data(context: RenderContext):
     lake_proj = None
 
     if hasattr(context.vector_data, 'land') and not context.vector_data.land.empty:
-        land_proj = _project_gdf(context.vector_data.land)
+        land_proj = _clip_and_project_gdf(context.vector_data.land)
 
     if hasattr(context.vector_data, 'lakes') and not context.vector_data.lakes.empty:
-        lake_proj = _project_gdf(context.vector_data.lakes)
+        lake_proj = _clip_and_project_gdf(context.vector_data.lakes)
 
     return land_proj, lake_proj
 

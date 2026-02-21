@@ -160,11 +160,13 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
 
 
 def _draw_movement_arrow(ax, grid, plan, hex_lookup, hex_radius):
-    """Draw a movement arrow along a hex path."""
+    """Draw a movement arrow along a hex path — thick red arrows."""
     if len(plan.hex_path) < 2:
         return
 
-    color = "#1144AA" if plan.side == "blue" else "#AA1111"
+    # Always red for movement arrows — highly visible
+    color = "#CC0000"
+    line_width = max(6.0, hex_radius * 0.15 / 1000)  # Scale with hex size, min 6pt
 
     centers = []
     for hex_id in plan.hex_path:
@@ -176,22 +178,21 @@ def _draw_movement_arrow(ax, grid, plan, hex_lookup, hex_radius):
     if len(centers) < 2:
         return
 
-    # Draw thick arrow line through all waypoints
+    # Draw thick red line through all waypoints
     xs = [c[0] for c in centers]
     ys = [c[1] for c in centers]
 
-    # Draw the path as a thick line
     ax.plot(
         xs, ys,
         color=color,
-        linewidth=3.0,
-        alpha=0.7,
+        linewidth=line_width,
+        alpha=0.85,
         zorder=6.5,
         solid_capstyle="round",
         solid_joinstyle="round",
     )
 
-    # Arrowhead at the end
+    # Large arrowhead at the end
     dx = centers[-1][0] - centers[-2][0]
     dy = centers[-1][1] - centers[-2][1]
     ax.annotate(
@@ -201,8 +202,8 @@ def _draw_movement_arrow(ax, grid, plan, hex_lookup, hex_radius):
         arrowprops=dict(
             arrowstyle="-|>",
             color=color,
-            lw=3.0,
-            mutation_scale=20,
+            lw=line_width,
+            mutation_scale=40,
         ),
         zorder=6.5,
     )
