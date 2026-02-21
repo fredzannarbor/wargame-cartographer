@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 from shapely.geometry import Point
+from shapely.ops import unary_union
+from shapely.prepared import prep
 
 from wargame_cartographer.config.map_spec import BoundingBox
 from wargame_cartographer.geo.elevation import ElevationProcessor
@@ -25,48 +27,70 @@ class HexSampler:
         bbox: BoundingBox,
         vector_data=None,
     ) -> dict[tuple[int, int], dict]:
-        """Build complete terrain data for every hex.
-
-        Returns dict mapping (q, r) → {
-            'terrain': TerrainType,
-            'elevation_m': float,
-            'slope_deg': float,
-        }
-        """
-        # Get elevation data
+        """Build complete terrain data for every hex."""
         elevation, metadata = self.elevation_proc.get_elevation(bbox)
         slope = self.elevation_proc.compute_slope(elevation)
 
-        # Build spatial indexes for vector features
-        water_polys = None
-        urban_points = set()
-        forest_check = None
+        # Build spatial indexes for fast point-in-polygon tests
+        land_prep = None
+        lake_prep = None
+        city_coords = {}
 
         if vector_data is not None:
-            # Water: use lakes + ocean
-            if hasattr(vector_data, 'lakes') and not vector_data.lakes.empty:
-                from shapely.ops import unary_union
+            if hasattr(vector_data, 'land') and not vector_data.land.empty:
                 try:
-                    water_polys = unary_union(vector_data.lakes.geometry)
+                    land_union = unary_union(vector_data.land.geometry)
+                    land_prep = prep(land_union)
                 except Exception:
                     pass
 
-            # Cities: mark hexes containing cities as urban
+            if hasattr(vector_data, 'lakes') and not vector_data.lakes.empty:
+                try:
+                    lake_union = unary_union(vector_data.lakes.geometry)
+                    lake_prep = prep(lake_union)
+                except Exception:
+                    pass
+
             if hasattr(vector_data, 'cities') and not vector_data.cities.empty:
                 for _, city in vector_data.cities.iterrows():
                     if hasattr(city.geometry, 'x'):
-                        # Find which hex this city falls in
-                        for (q, r), cell in grid.cells.items():
-                            dx = cell.center_lon - city.geometry.x
-                            dy = cell.center_lat - city.geometry.y
-                            # Approximate: if within hex radius in degrees
-                            if abs(dx) < 0.1 and abs(dy) < 0.1:
-                                urban_points.add((q, r))
-                                break
+                        name = ""
+                        if hasattr(city, "get"):
+                            name = city.get("name", "")
+                        city_coords[(city.geometry.x, city.geometry.y)] = name
+
+        # Find urban hexes (hexes containing or very near a city)
+        urban_hexes = set()
+        if city_coords:
+            for (q, r), cell in grid.cells.items():
+                for (cx, cy), cname in city_coords.items():
+                    dlat = abs(cell.center_lat - cy)
+                    dlon = abs(cell.center_lon - cx)
+                    threshold = grid.hex_radius_m / 111320.0 * 0.8
+                    cos_lat = max(0.5, abs(np.cos(np.radians(cell.center_lat))))
+                    if dlat < threshold and dlon < threshold / cos_lat:
+                        urban_hexes.add((q, r))
+                        break
 
         result = {}
         for (q, r), cell in grid.cells.items():
-            # Sample elevation at hex center
+            pt = Point(cell.center_lon, cell.center_lat)
+
+            # Water: not on land polygon, or in a lake
+            is_water = False
+            if land_prep is not None:
+                is_water = not land_prep.contains(pt)
+            else:
+                elev = self.elevation_proc.sample_at_point(
+                    elevation, metadata, cell.center_lon, cell.center_lat
+                )
+                is_water = elev <= 0
+
+            if not is_water and lake_prep is not None:
+                if lake_prep.contains(pt):
+                    is_water = True
+
+            # Sample elevation
             elev = self.elevation_proc.sample_at_point(
                 elevation, metadata, cell.center_lon, cell.center_lat
             )
@@ -80,26 +104,15 @@ class HexSampler:
             else:
                 slope_val = 0.0
 
-            # Check water
-            is_water = False
-            if elev <= 0:
-                is_water = True
-            elif water_polys is not None:
-                pt = Point(cell.center_lon, cell.center_lat)
-                try:
-                    is_water = water_polys.contains(pt)
-                except Exception:
-                    pass
+            is_urban = (q, r) in urban_hexes
 
-            # Check urban
-            is_urban = (q, r) in urban_points
-
-            # Classify
             terrain = self.classifier.classify(
-                elevation_m=elev,
+                elevation_m=max(0, elev) if not is_water else elev,
                 slope_deg=slope_val,
                 is_water=is_water,
                 is_urban=is_urban,
+                lat=cell.center_lat,
+                lon=cell.center_lon,
             )
 
             result[(q, r)] = {

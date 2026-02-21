@@ -34,9 +34,8 @@ def load_vector_data(bbox: BoundingBox, spec: MapSpec) -> VectorData:
     lakes = dl.get_natural_earth("lakes", bbox)
     countries = dl.get_natural_earth("countries", bbox)
 
-    # POIs from OSM
-    cities = dl.get_osm_cities(bbox) if spec.show_cities else gpd.GeoDataFrame()
-    ports = dl.get_osm_ports(bbox) if spec.show_ports else gpd.GeoDataFrame()
+    cities = dl.get_cities(bbox) if spec.show_cities else gpd.GeoDataFrame()
+    ports = dl.get_ports(bbox) if spec.show_ports else gpd.GeoDataFrame()
 
     return VectorData(
         coastline=coastline,
