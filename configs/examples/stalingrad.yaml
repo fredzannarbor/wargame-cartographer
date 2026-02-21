@@ -1,0 +1,37 @@
+name: "Stalingrad 1942"
+title: "STALINGRAD"
+subtitle: "The Turning Point"
+scenario: "August 1942 - February 1943"
+
+bbox:
+  min_lon: 43.8
+  min_lat: 48.4
+  max_lon: 44.8
+  max_lat: 49.0
+
+map_style: hex
+designer_style: kibler
+hex_size_km: 1.0
+
+output_width_mm: 500
+output_height_mm: 500
+dpi: 300
+
+show_elevation_shading: true
+show_rivers: true
+show_roads: true
+show_railways: false
+show_cities: true
+show_ports: true
+show_airfields: false
+show_hex_numbers: true
+show_legend: true
+show_scale_bar: true
+show_compass: true
+
+output_formats:
+  - png
+  - html
+  - json
+
+output_dir: ./output

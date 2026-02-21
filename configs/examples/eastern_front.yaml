@@ -1,0 +1,37 @@
+name: "Eastern Front 1941"
+title: "BARBAROSSA"
+subtitle: "Operation Barbarossa - The Eastern Front"
+scenario: "June - December 1941"
+
+bbox:
+  min_lon: 20.0
+  min_lat: 45.0
+  max_lon: 42.0
+  max_lat: 60.0
+
+map_style: hex
+designer_style: simonsen
+hex_size_km: 50.0
+
+output_width_mm: 700
+output_height_mm: 900
+dpi: 300
+
+show_elevation_shading: true
+show_rivers: true
+show_roads: false
+show_railways: false
+show_cities: true
+show_ports: true
+show_airfields: false
+show_hex_numbers: true
+show_legend: true
+show_scale_bar: true
+show_compass: true
+
+output_formats:
+  - png
+  - html
+  - json
+
+output_dir: ./output

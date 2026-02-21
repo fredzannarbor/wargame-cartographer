@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.venv/
+cache/
+*.tif
+*.tiff
+output/*.png
+output/*.pdf
+output/*.html
+output/*.json
+.env

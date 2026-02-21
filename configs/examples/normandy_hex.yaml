@@ -1,0 +1,37 @@
+name: "Normandy 1944"
+title: "OVERLORD"
+subtitle: "D-Day to the Breakout"
+scenario: "June 6 - August 25, 1944"
+
+bbox:
+  min_lon: -1.80
+  min_lat: 48.80
+  max_lon: 0.50
+  max_lat: 49.80
+
+map_style: hex
+designer_style: simonitch
+hex_size_km: 5.0
+
+output_width_mm: 580
+output_height_mm: 420
+dpi: 300
+
+show_elevation_shading: true
+show_rivers: true
+show_roads: false
+show_railways: false
+show_cities: true
+show_ports: true
+show_airfields: false
+show_hex_numbers: true
+show_legend: true
+show_scale_bar: true
+show_compass: true
+
+output_formats:
+  - png
+  - html
+  - json
+
+output_dir: ./output
