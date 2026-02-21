@@ -116,7 +116,7 @@ SIMONSEN = WargameStyle(
         TerrainType.MOUNTAIN: "#8B6914",
         TerrainType.ROUGH: "#CD853F",
         TerrainType.WATER: "#4169E1",
-        TerrainType.URBAN: "#B22222",
+        TerrainType.URBAN: "#E8E0C0",  # Light base; street grid pattern overlays
         TerrainType.MARSH: "#2E8B57",
         TerrainType.DESERT: "#F4D03F",
     },

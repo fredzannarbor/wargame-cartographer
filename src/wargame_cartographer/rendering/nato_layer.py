@@ -56,15 +56,15 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
     r = grid.hex_radius_m
     hex_lookup = _build_hex_lookup(grid)
 
-    # Counter dimensions as fraction of hex radius
-    counter_w = r * 0.75
-    counter_h = r * 0.55
+    # Counter dimensions — fill most of the hex
+    counter_w = r * 1.2
+    counter_h = r * 0.85
 
     # Font sizes scale with font_scale from spec
     fs = context.spec.font_scale
-    symbol_fontsize = 6 * fs
-    size_fontsize = 4.5 * fs
-    desig_fontsize = 4 * fs
+    symbol_fontsize = 8 * fs
+    size_fontsize = 5.5 * fs
+    desig_fontsize = 5 * fs
 
     for unit in context.spec.nato_units:
         entry = hex_lookup.get(unit.hex_id)
