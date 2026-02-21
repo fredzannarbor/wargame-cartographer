@@ -95,7 +95,7 @@ class MapSpec(BaseModel):
     hex_size_km: float = 10.0
     output_width_mm: float = 500.0
     output_height_mm: float = 700.0
-    dpi: int = 300
+    dpi: int = 150
 
     crs: str | None = None  # Auto-selected if None
     font_scale: float = 1.0  # Multiply all font sizes by this factor

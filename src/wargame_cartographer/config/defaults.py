@@ -20,6 +20,6 @@ OVERPASS_API_URL = "https://overpass-api.de/api/interpreter"
 CACHE_MAX_AGE_DAYS = 30
 
 # Default map dimensions
-DEFAULT_DPI = 300
+DEFAULT_DPI = 150
 DEFAULT_OUTPUT_WIDTH_MM = 500
 DEFAULT_OUTPUT_HEIGHT_MM = 700

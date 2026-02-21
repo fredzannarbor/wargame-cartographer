@@ -73,7 +73,7 @@ SIMONITCH = WargameStyle(
     name="simonitch",
     terrain_colors={
         TerrainType.CLEAR: "#F5EDD5",
-        TerrainType.FOREST: "#4A7C3F",
+        TerrainType.FOREST: "#7CB87A",
         TerrainType.MOUNTAIN: "#9B8B78",
         TerrainType.ROUGH: "#C4AE87",
         TerrainType.WATER: "#7BB3D0",
@@ -112,7 +112,7 @@ SIMONSEN = WargameStyle(
     name="simonsen",
     terrain_colors={
         TerrainType.CLEAR: "#E8E0C0",
-        TerrainType.FOREST: "#228B22",
+        TerrainType.FOREST: "#5DAE5D",
         TerrainType.MOUNTAIN: "#8B6914",
         TerrainType.ROUGH: "#CD853F",
         TerrainType.WATER: "#4169E1",
@@ -154,7 +154,7 @@ KIBLER = WargameStyle(
     name="kibler",
     terrain_colors={
         TerrainType.CLEAR: "#F0E6C8",
-        TerrainType.FOREST: "#2D5A27",
+        TerrainType.FOREST: "#5A8F54",
         TerrainType.MOUNTAIN: "#6B4E3D",
         TerrainType.ROUGH: "#A0855A",
         TerrainType.WATER: "#3A6F9F",

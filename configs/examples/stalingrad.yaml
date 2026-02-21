@@ -15,7 +15,7 @@ hex_size_km: 1.0
 
 output_width_mm: 500
 output_height_mm: 500
-dpi: 300
+dpi: 150
 
 show_elevation_shading: true
 show_rivers: true

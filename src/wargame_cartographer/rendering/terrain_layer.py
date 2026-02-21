@@ -1,4 +1,4 @@
-"""Terrain layer: colored hex fills with custom terrain patterns."""
+"""Terrain layer: colored hex fills with custom terrain patterns and coastal contours."""
 
 from __future__ import annotations
 
@@ -9,9 +9,75 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import PathPatch, Circle, FancyBboxPatch
 from matplotlib.path import Path as MplPath
 import numpy as np
+from shapely.geometry import Polygon, MultiPolygon, Point
+from shapely.ops import unary_union
+from shapely.prepared import prep
 
 from wargame_cartographer.rendering.renderer import RenderContext
 from wargame_cartographer.terrain.types import TerrainType
+
+
+def _build_coastal_data(context: RenderContext):
+    """Build projected land+lake polygons for coastal contour rendering.
+
+    Returns (land_proj, lake_proj) as shapely geometries in projected CRS,
+    or (None, None) if vector data is unavailable.
+    """
+    if context.vector_data is None:
+        return None, None
+
+    transformer = context.grid._to_proj
+
+    def _project_gdf(gdf):
+        """Project a GeoDataFrame's geometries to the grid CRS."""
+        polys = []
+        for _, row in gdf.iterrows():
+            geom = row.geometry
+            if geom is None:
+                continue
+            try:
+                projected = _project_polygon(geom, transformer)
+                if projected is not None and projected.is_valid and not projected.is_empty:
+                    polys.append(projected)
+            except Exception:
+                continue
+        if not polys:
+            return None
+        try:
+            return unary_union(polys)
+        except Exception:
+            return None
+
+    land_proj = None
+    lake_proj = None
+
+    if hasattr(context.vector_data, 'land') and not context.vector_data.land.empty:
+        land_proj = _project_gdf(context.vector_data.land)
+
+    if hasattr(context.vector_data, 'lakes') and not context.vector_data.lakes.empty:
+        lake_proj = _project_gdf(context.vector_data.lakes)
+
+    return land_proj, lake_proj
+
+
+def _project_polygon(geom, transformer):
+    """Project a shapely polygon/multipolygon using a pyproj transformer."""
+    if isinstance(geom, Polygon):
+        ext_coords = [transformer.transform(x, y) for x, y in geom.exterior.coords]
+        holes = []
+        for interior in geom.interiors:
+            hole_coords = [transformer.transform(x, y) for x, y in interior.coords]
+            holes.append(hole_coords)
+        return Polygon(ext_coords, holes)
+    elif isinstance(geom, MultiPolygon):
+        parts = []
+        for poly in geom.geoms:
+            p = _project_polygon(poly, transformer)
+            if p is not None and p.is_valid and not p.is_empty:
+                parts.append(p)
+        if parts:
+            return MultiPolygon(parts) if len(parts) > 1 else parts[0]
+    return None
 
 
 def render_terrain_layer(ax: plt.Axes, context: RenderContext):
@@ -19,6 +85,10 @@ def render_terrain_layer(ax: plt.Axes, context: RenderContext):
     style = context.style
     grid = context.grid
     r = grid.hex_radius_m
+
+    # Build projected land/lake geometry for coastal contours
+    land_proj, lake_proj = _build_coastal_data(context)
+    land_prepared = prep(land_proj) if land_proj is not None else None
 
     for (q, row) in grid.all_hexes():
         verts = grid.hex_vertices(q, row)
@@ -35,26 +105,130 @@ def render_terrain_layer(ax: plt.Axes, context: RenderContext):
         terrain = terrain_info.get("terrain", TerrainType.CLEAR)
         color = style.terrain_colors.get(terrain, "#F5EDD5")
 
-        # Base fill — no hatch, we draw custom patterns instead
-        patch = PathPatch(
-            path,
-            facecolor=color,
-            edgecolor="none",
-            linewidth=0,
-            zorder=1,
-        )
-        ax.add_patch(patch)
+        # Check if this is a coastal hex (water hex that intersects land,
+        # or land hex that intersects water)
+        is_coastal = False
+        hex_poly = None
+
+        if land_proj is not None:
+            hex_poly = Polygon(verts)
+            if hex_poly.is_valid:
+                try:
+                    if terrain == TerrainType.WATER:
+                        # Water hex: check if any land intrudes
+                        is_coastal = land_prepared.intersects(hex_poly) and not land_prepared.contains(hex_poly)
+                    else:
+                        # Land hex: check if it's partially over water
+                        is_coastal = not land_prepared.contains(hex_poly) and land_prepared.intersects(hex_poly)
+                except Exception:
+                    is_coastal = False
+
+        if is_coastal and hex_poly is not None:
+            # Draw coastal hex with actual coastline contour
+            _draw_coastal_hex(ax, context, hex_poly, verts_arr, codes, terrain, land_proj, lake_proj)
+        else:
+            # Standard solid fill
+            patch = PathPatch(
+                path,
+                facecolor=color,
+                edgecolor="none",
+                linewidth=0,
+                zorder=1,
+            )
+            ax.add_patch(patch)
 
         cell = grid.cells[(q, row)]
         cx, cy = cell.center_x, cell.center_y
 
-        # Custom terrain decorations
+        # Custom terrain decorations (skip for water hexes)
         if terrain == TerrainType.URBAN:
             _draw_urban_grid(ax, cx, cy, r)
         elif terrain == TerrainType.FOREST:
             _draw_forest_trees(ax, cx, cy, r, q, row)
         elif terrain == TerrainType.ROUGH:
             _draw_rough_blotches(ax, cx, cy, r, q, row)
+
+
+def _draw_coastal_hex(ax, context, hex_poly, verts_arr, codes, terrain, land_proj, lake_proj):
+    """Draw a hex with actual coastline contour: land part in land color, water part in water color."""
+    style = context.style
+    water_color = style.water_color
+    land_color = style.terrain_colors.get(TerrainType.CLEAR, "#F5EDD5")
+
+    hex_path = MplPath(verts_arr, codes)
+
+    try:
+        # Compute land portion within this hex
+        land_in_hex = hex_poly.intersection(land_proj)
+
+        # Subtract lakes from land
+        if lake_proj is not None:
+            try:
+                land_in_hex = land_in_hex.difference(lake_proj)
+            except Exception:
+                pass
+
+        # First: fill entire hex with water color
+        water_patch = PathPatch(
+            hex_path,
+            facecolor=water_color,
+            edgecolor="none",
+            linewidth=0,
+            zorder=1,
+        )
+        ax.add_patch(water_patch)
+
+        # Then: overlay land portion with land color
+        if not land_in_hex.is_empty:
+            _draw_shapely_polygon(ax, land_in_hex, land_color, zorder=1.1)
+
+    except Exception:
+        # Fallback: just fill with terrain color
+        fallback_color = style.terrain_colors.get(terrain, "#F5EDD5")
+        patch = PathPatch(
+            hex_path,
+            facecolor=fallback_color,
+            edgecolor="none",
+            linewidth=0,
+            zorder=1,
+        )
+        ax.add_patch(patch)
+
+
+def _draw_shapely_polygon(ax, geom, color, zorder=1.1):
+    """Render a shapely Polygon or MultiPolygon as matplotlib patches."""
+    if isinstance(geom, Polygon):
+        if geom.is_empty:
+            return
+        ext = np.array(geom.exterior.coords)
+        if len(ext) < 3:
+            return
+
+        # Build path with exterior + holes
+        all_verts = list(ext)
+        all_codes = [MplPath.MOVETO] + [MplPath.LINETO] * (len(ext) - 2) + [MplPath.CLOSEPOLY]
+
+        for interior in geom.interiors:
+            hole = np.array(interior.coords)
+            if len(hole) >= 3:
+                all_verts.extend(hole)
+                all_codes.extend(
+                    [MplPath.MOVETO] + [MplPath.LINETO] * (len(hole) - 2) + [MplPath.CLOSEPOLY]
+                )
+
+        path = MplPath(all_verts, all_codes)
+        patch = PathPatch(path, facecolor=color, edgecolor="none", linewidth=0, zorder=zorder)
+        ax.add_patch(patch)
+
+    elif isinstance(geom, MultiPolygon):
+        for poly in geom.geoms:
+            _draw_shapely_polygon(ax, poly, color, zorder=zorder)
+
+    elif hasattr(geom, 'geoms'):
+        # GeometryCollection — draw any polygon parts
+        for part in geom.geoms:
+            if isinstance(part, (Polygon, MultiPolygon)):
+                _draw_shapely_polygon(ax, part, color, zorder=zorder)
 
 
 def _draw_urban_grid(ax, cx, cy, r):
@@ -101,32 +275,47 @@ def _draw_urban_grid(ax, cx, cy, r):
 
 
 def _draw_forest_trees(ax, cx, cy, r, q, row):
-    """Draw small tree symbols (stylized triangles) scattered in the hex."""
+    """Draw curly organic tree canopy blobs scattered in the hex."""
     # Deterministic pseudo-random positions
     seed = int(hashlib.md5(f"{q},{row}".encode()).hexdigest()[:8], 16)
     rng = np.random.RandomState(seed)
 
-    n_trees = 8
-    spread = r * 0.55
+    n_trees = 7
+    spread = r * 0.50
 
     for i in range(n_trees):
         # Random offset within hex, clustered near center
         tx = cx + rng.uniform(-spread, spread)
         ty = cy + rng.uniform(-spread, spread)
 
-        # Small triangle (tree top)
-        tree_h = r * 0.18
-        tree_w = r * 0.10
-        tri_x = [tx - tree_w, tx + tree_w, tx, tx - tree_w]
-        tri_y = [ty, ty, ty + tree_h, ty]
-        ax.fill(tri_x, tri_y, color="#1B5E20", zorder=1.4, alpha=0.85)
+        # Curly canopy: overlapping irregular circles with wavy edges
+        canopy_r = r * rng.uniform(0.10, 0.18)
+        n_lobes = 8 + rng.randint(0, 5)
+        angles = np.linspace(0, 2 * math.pi, n_lobes * 4, endpoint=False)
+        # Wavy radius variation for organic look
+        radii = canopy_r * (1.0 + 0.25 * np.sin(angles * n_lobes) + 0.1 * rng.randn(len(angles)))
+        xs = tx + radii * np.cos(angles)
+        ys = ty + radii * np.sin(angles)
 
-        # Trunk
-        trunk_h = r * 0.06
-        ax.plot(
-            [tx, tx], [ty - trunk_h, ty],
-            color="#5D4037", linewidth=1.0, zorder=1.35,
+        # Darker green canopy fill — softer than before
+        ax.fill(
+            xs, ys,
+            color="#3D7A3D",
+            zorder=1.4,
+            alpha=0.65,
+            edgecolor="#2D6A2D",
+            linewidth=0.3,
         )
+
+        # Lighter highlight lobe on top for depth
+        highlight_r = canopy_r * 0.5
+        hx = tx + rng.uniform(-canopy_r * 0.2, canopy_r * 0.2)
+        hy = ty + canopy_r * 0.3
+        h_angles = np.linspace(0, 2 * math.pi, 12)
+        h_radii = highlight_r * (1.0 + 0.2 * np.sin(h_angles * 5))
+        hxs = hx + h_radii * np.cos(h_angles)
+        hys = hy + h_radii * np.sin(h_angles)
+        ax.fill(hxs, hys, color="#5EA85E", zorder=1.45, alpha=0.4)
 
 
 def _draw_rough_blotches(ax, cx, cy, r, q, row):
