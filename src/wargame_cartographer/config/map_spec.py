@@ -2,13 +2,26 @@
 
 from __future__ import annotations
 
+import logging
 import math
 from pathlib import Path
 from typing import Literal
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from shapely.geometry import box as shapely_box
+
+logger = logging.getLogger(__name__)
+
+# Standard wargame map sheet sizes (width_inches, height_inches) in landscape
+MAP_SHEET_SIZES: dict[str, tuple[float, float]] = {
+    "11x17": (17.0, 11.0),
+    "17x22": (22.0, 17.0),
+    "22x34": (34.0, 22.0),
+    "34x44": (44.0, 34.0),
+}
+
+INCHES_TO_MM = 25.4
 
 
 class BoundingBox(BaseModel):
@@ -63,10 +76,10 @@ class NATOUnit(BaseModel):
     """A NATO-style unit counter for deployment overlay."""
 
     designation: str
-    unit_type: str = "infantry"  # infantry, armor, artillery, etc.
-    size: str = "division"  # squad, platoon, company, battalion, regiment, brigade, division, corps, army
-    hex_id: str = ""  # Wargame hex number e.g. "2013"
-    side: str = "blue"  # blue (friendly) or red (enemy)
+    unit_type: str = "infantry"
+    size: str = "division"
+    hex_id: str = ""
+    side: str = "blue"
     combat_factor: int = 0
     movement_factor: int = 0
 
@@ -75,8 +88,38 @@ class MovementPlan(BaseModel):
     """A movement arrow from one hex to another."""
 
     unit_designation: str
-    hex_path: list[str]  # List of hex IDs
+    hex_path: list[str]
     side: str = "blue"
+
+
+class OOBUnit(BaseModel):
+    """A unit entry in an Order of Battle."""
+
+    designation: str
+    unit_type: str = "infantry"
+    size: str = "division"
+    combat_factor: int = 0
+    movement_factor: int = 0
+    setup_hex: str = ""
+
+
+class OOBEntry(BaseModel):
+    """An Order of Battle formation entry."""
+
+    side: str
+    formation: str
+    units: list[OOBUnit] = Field(default_factory=list)
+    setup_turn: int = 1
+    setup_zone: str = ""
+    notes: str = ""
+
+
+class ModulePanel(BaseModel):
+    """A game module panel (CRT, TEC, etc.)."""
+
+    panel_type: Literal["crt", "tec", "sequence_of_play", "custom"] = "crt"
+    title: str = ""
+    custom_data: dict | None = None
 
 
 class MapSpec(BaseModel):
@@ -97,12 +140,23 @@ class MapSpec(BaseModel):
     output_height_mm: float = 700.0
     dpi: int = 150
 
-    crs: str | None = None  # Auto-selected if None
-    font_scale: float = 1.0  # Multiply all font sizes by this factor
+    # Standard map sheet sizes — overrides output_width_mm/output_height_mm when set
+    map_size: str | None = None
+    map_sheets: int = 1
+    map_orientation: Literal["portrait", "landscape"] = "landscape"
+
+    crs: str | None = None
+    font_scale: float = 1.0
+
+    # Hex readability
+    min_hex_px: int = 40
+
+    # Counter-to-hex sizing
+    counter_hex_ratio: float = 0.65
 
     show_elevation_shading: bool = True
     show_rivers: bool = True
-    show_roads: bool = False  # Can be noisy at strategic scale
+    show_roads: bool = False
     show_railways: bool = False
     show_cities: bool = True
     show_ports: bool = True
@@ -115,10 +169,56 @@ class MapSpec(BaseModel):
     nato_units: list[NATOUnit] | None = None
     movement_plans: list[MovementPlan] | None = None
 
+    # Side panels
+    show_oob_panel: bool = False
+    oob_panel_position: Literal["right", "left", "bottom"] = "right"
+    oob_panel_width_ratio: float = 0.25
+    oob_data: list[OOBEntry] | None = None
+
+    show_module_panels: bool = False
+    module_panel_position: Literal["bottom", "right", "left"] = "bottom"
+    module_panels: list[ModulePanel] | None = None
+
     output_dir: Path = Field(default_factory=lambda: Path("./output"))
     output_formats: list[Literal["png", "pdf", "html", "json"]] = Field(
         default_factory=lambda: ["png", "html", "json"]
     )
+
+    @model_validator(mode="after")
+    def _resolve_map_size(self) -> MapSpec:
+        """If map_size is set, compute output dimensions from standard sheet sizes."""
+        if self.map_size is None:
+            return self
+
+        size_key = self.map_size.lower().replace(" ", "")
+        if size_key in MAP_SHEET_SIZES:
+            w_in, h_in = MAP_SHEET_SIZES[size_key]
+        else:
+            try:
+                parts = size_key.split("x")
+                w_in, h_in = float(parts[0]), float(parts[1])
+            except (ValueError, IndexError):
+                logger.warning(
+                    "Unknown map_size '%s'. Valid: %s or 'WxH' in inches.",
+                    self.map_size,
+                    list(MAP_SHEET_SIZES.keys()),
+                )
+                return self
+
+        if self.map_orientation == "portrait":
+            w_in, h_in = min(w_in, h_in), max(w_in, h_in)
+        else:
+            w_in, h_in = max(w_in, h_in), min(w_in, h_in)
+
+        if self.map_sheets == 2:
+            w_in *= 2
+        elif self.map_sheets == 4:
+            w_in *= 2
+            h_in *= 2
+
+        self.output_width_mm = w_in * INCHES_TO_MM
+        self.output_height_mm = h_in * INCHES_TO_MM
+        return self
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> MapSpec:

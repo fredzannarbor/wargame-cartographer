@@ -64,6 +64,11 @@ class WargameStyle:
     road_color: str = "#8B4513"
     road_linewidth: float = 0.5
 
+    # Counter aesthetics
+    counter_shadow: bool = True
+    label_halo: bool = True
+    terrain_decoration_density: float = 1.0
+
 
 # --- Mark Simonitch Style ---
 # Warm earth tones, muted greens, crisp thin grid lines
@@ -101,6 +106,9 @@ SIMONITCH = WargameStyle(
     river_linewidth=1.2,
     coastline_color="#4A3F35",
     hillshade_alpha=0.30,
+    counter_shadow=True,
+    label_halo=True,
+    terrain_decoration_density=1.0,
 )
 
 
@@ -143,6 +151,9 @@ SIMONSEN = WargameStyle(
     river_color="#4169E1",
     hillshade_alpha=0.25,
     border_linewidth=3.0,
+    counter_shadow=False,
+    label_halo=True,
+    terrain_decoration_density=1.0,
 )
 
 
@@ -184,6 +195,9 @@ KIBLER = WargameStyle(
     coastline_linewidth=1.0,
     hillshade_alpha=0.40,
     border_linewidth=2.5,
+    counter_shadow=True,
+    label_halo=True,
+    terrain_decoration_density=1.2,
 )
 
 
@@ -223,6 +237,9 @@ def scale_style(base: WargameStyle, font_scale: float = 1.0, name: str | None = 
         coastline_linewidth=base.coastline_linewidth,
         road_color=base.road_color,
         road_linewidth=base.road_linewidth,
+        counter_shadow=base.counter_shadow,
+        label_halo=base.label_halo,
+        terrain_decoration_density=base.terrain_decoration_density,
     )
 
 
