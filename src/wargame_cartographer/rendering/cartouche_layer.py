@@ -181,19 +181,19 @@ def _draw_scale_bar(ax, context, x_min, y_min, width, height):
     ax.text(
         bar_x, bar_y - bar_h * 0.5,
         "0",
-        fontsize=5, ha="center", va="top", zorder=10,
+        fontsize=10, ha="center", va="top", zorder=10,
     )
     ax.text(
         bar_x + scale_m, bar_y - bar_h * 0.5,
         f"{scale_km} km",
-        fontsize=5, ha="center", va="top", zorder=10,
+        fontsize=10, ha="center", va="top", zorder=10,
     )
 
     # Hex size annotation
     ax.text(
         bar_x, bar_y + bar_h * 2,
         f"1 hex = {hex_km:.0f} km",
-        fontsize=4, ha="left", va="bottom", color="#666666", zorder=10,
+        fontsize=9, ha="left", va="bottom", color="#444444", zorder=10,
     )
 
     # Compute and show map scale ratio
@@ -206,7 +206,7 @@ def _draw_scale_bar(ax, context, x_min, y_min, width, height):
     ax.text(
         bar_x, bar_y - bar_h * 3,
         f"Scale approx 1:{scale_ratio:,}",
-        fontsize=3.5, ha="left", va="top", color="#888888", zorder=10,
+        fontsize=9, ha="left", va="top", color="#666666", zorder=10,
     )
 
 
@@ -242,9 +242,9 @@ def _draw_hex_metrics(ax, context, x_min, y_min, width, height):
         x_min + width * 0.03,
         y_min + height * 0.012,
         metrics_text,
-        fontsize=3.0,
+        fontsize=8.0,
         fontfamily="monospace",
-        color="#999999",
+        color="#666666",
         va="bottom",
         ha="left",
         zorder=10,
@@ -263,9 +263,9 @@ def _draw_legend(ax, context, x_max, y_min, width, height):
     if not terrains_present:
         return
 
-    # Legend box — readable, proportionate fonts
-    legend_w = width * 0.18
-    row_h = height * 0.022
+    # Legend box — 13pt readable fonts
+    legend_w = width * 0.32
+    row_h = height * 0.045
     legend_h = row_h * (len(terrains_present) + 1.5)
     lx = x_max - width * 0.02 - legend_w
     ly = y_min + height * 0.04
@@ -284,7 +284,7 @@ def _draw_legend(ax, context, x_max, y_min, width, height):
     ax.text(
         lx + legend_w * 0.5, ly + legend_h - row_h * 0.3,
         "TERRAIN EFFECTS",
-        fontsize=5.0, fontweight="bold", ha="center", va="top",
+        fontsize=15.0, fontweight="bold", ha="center", va="top",
         fontfamily="sans-serif", zorder=10,
     )
 
@@ -313,7 +313,7 @@ def _draw_legend(ax, context, x_max, y_min, width, height):
         ax.text(
             lx + legend_w * 0.16, y_pos,
             label,
-            fontsize=4.0, va="center", ha="left",
+            fontsize=13.0, va="center", ha="left",
             fontfamily="sans-serif", zorder=10,
         )
 

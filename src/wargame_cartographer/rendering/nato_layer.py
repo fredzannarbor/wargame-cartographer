@@ -82,7 +82,7 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
             facecolor=bg_color,
             edgecolor="black",
             linewidth=1.5,
-            zorder=7,
+            zorder=8.5,
         )
         ax.add_patch(box)
 
@@ -96,7 +96,7 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
             ha="center", va="center",
             fontfamily="sans-serif",
             fontweight="bold",
-            zorder=8,
+            zorder=9,
         )
 
         # Size indicator above counter
@@ -110,7 +110,7 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
                 ha="center", va="bottom",
                 fontfamily="sans-serif",
                 fontweight="bold",
-                zorder=8,
+                zorder=9,
                 bbox=dict(facecolor="white", alpha=0.7, edgecolor="none", pad=0.3),
             )
 
@@ -123,7 +123,7 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
             ha="center", va="top",
             fontfamily="sans-serif",
             fontweight="bold",
-            zorder=8,
+            zorder=9,
             bbox=dict(facecolor="white", alpha=0.7, edgecolor="none", pad=0.3),
         )
 
@@ -139,7 +139,7 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
                 color=text_color,
                 ha="center", va="center",
                 fontfamily="sans-serif",
-                zorder=8,
+                zorder=9,
             )
             # Movement factor (right)
             ax.text(
@@ -150,7 +150,7 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
                 color=text_color,
                 ha="center", va="center",
                 fontfamily="sans-serif",
-                zorder=8,
+                zorder=9,
             )
 
     # Movement arrows
@@ -187,7 +187,7 @@ def _draw_movement_arrow(ax, grid, plan, hex_lookup, hex_radius):
         color=color,
         linewidth=line_width,
         alpha=0.85,
-        zorder=6.5,
+        zorder=8,
         solid_capstyle="round",
         solid_joinstyle="round",
     )
@@ -205,5 +205,5 @@ def _draw_movement_arrow(ax, grid, plan, hex_lookup, hex_radius):
             lw=line_width,
             mutation_scale=40,
         ),
-        zorder=6.5,
+        zorder=8,
     )
