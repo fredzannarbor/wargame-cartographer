@@ -97,6 +97,11 @@ class MapRenderer:
         from wargame_cartographer.rendering.label_layer import render_label_layer
         render_label_layer(ax, context)
 
+        # Layer 7.5: NATO unit counters and movement arrows
+        if context.spec.nato_units:
+            from wargame_cartographer.rendering.nato_layer import render_nato_layer
+            render_nato_layer(ax, context)
+
         # Layer 8: Cartouche (title, legend, scale bar)
         from wargame_cartographer.rendering.cartouche_layer import render_cartouche_layer
         render_cartouche_layer(ax, context, x_min, x_max, y_min, y_max)

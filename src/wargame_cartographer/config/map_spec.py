@@ -98,6 +98,7 @@ class MapSpec(BaseModel):
     dpi: int = 300
 
     crs: str | None = None  # Auto-selected if None
+    font_scale: float = 1.0  # Multiply all font sizes by this factor
 
     show_elevation_shading: bool = True
     show_rivers: bool = True

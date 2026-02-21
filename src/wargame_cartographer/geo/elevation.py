@@ -63,6 +63,12 @@ class ElevationProcessor:
         lon_min = int(math.floor(bbox.min_lon))
         lon_max = int(math.floor(bbox.max_lon))
 
+        # Limit: if too many tiles, use synthetic instead
+        n_tiles = (lat_max - lat_min + 1) * (lon_max - lon_min + 1)
+        if n_tiles > 20:
+            console.print(f"  [yellow]Area requires {n_tiles} SRTM tiles (max 20), using synthetic elevation[/yellow]")
+            raise RuntimeError(f"Too many SRTM tiles needed: {n_tiles}")
+
         tile_paths = []
         for lat in range(lat_min, lat_max + 1):
             for lon in range(lon_min, lon_max + 1):

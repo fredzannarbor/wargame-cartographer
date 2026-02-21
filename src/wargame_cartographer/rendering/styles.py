@@ -187,6 +187,45 @@ KIBLER = WargameStyle(
 )
 
 
+def scale_style(base: WargameStyle, font_scale: float = 1.0, name: str | None = None) -> WargameStyle:
+    """Create a scaled copy of a style with larger/smaller fonts and markers."""
+    return WargameStyle(
+        name=name or base.name,
+        terrain_colors=base.terrain_colors,
+        terrain_hatches=base.terrain_hatches,
+        grid_color=base.grid_color,
+        grid_linewidth=base.grid_linewidth * font_scale,
+        grid_alpha=base.grid_alpha,
+        water_color=base.water_color,
+        hex_number_fontsize=base.hex_number_fontsize * font_scale,
+        hex_number_color=base.hex_number_color,
+        city_label_fontsize=base.city_label_fontsize * font_scale,
+        city_label_color=base.city_label_color,
+        title_fontsize=base.title_fontsize * font_scale,
+        city_marker=base.city_marker,
+        city_marker_size=base.city_marker_size * font_scale,
+        city_marker_color=base.city_marker_color,
+        port_marker=base.port_marker,
+        port_marker_size=base.port_marker_size * font_scale,
+        port_marker_color=base.port_marker_color,
+        airfield_marker=base.airfield_marker,
+        airfield_marker_size=base.airfield_marker_size * font_scale,
+        airfield_marker_color=base.airfield_marker_color,
+        border_color=base.border_color,
+        border_linewidth=base.border_linewidth,
+        legend_bg_color=base.legend_bg_color,
+        hillshade_alpha=base.hillshade_alpha,
+        hillshade_azimuth=base.hillshade_azimuth,
+        hillshade_altitude=base.hillshade_altitude,
+        river_color=base.river_color,
+        river_linewidth=base.river_linewidth,
+        coastline_color=base.coastline_color,
+        coastline_linewidth=base.coastline_linewidth,
+        road_color=base.road_color,
+        road_linewidth=base.road_linewidth,
+    )
+
+
 STYLES: dict[str, WargameStyle] = {
     "simonitch": SIMONITCH,
     "simonsen": SIMONSEN,
@@ -194,8 +233,11 @@ STYLES: dict[str, WargameStyle] = {
 }
 
 
-def get_style(name: str) -> WargameStyle:
-    """Get a designer style by name."""
+def get_style(name: str, font_scale: float = 1.0) -> WargameStyle:
+    """Get a designer style by name, optionally scaled."""
     if name not in STYLES:
         raise ValueError(f"Unknown style: {name}. Available: {list(STYLES.keys())}")
-    return STYLES[name]
+    style = STYLES[name]
+    if font_scale != 1.0:
+        style = scale_style(style, font_scale)
+    return style

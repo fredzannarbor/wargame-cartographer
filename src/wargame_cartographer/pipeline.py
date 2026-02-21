@@ -36,7 +36,7 @@ def run_pipeline(
     # 1. Load spec
     status("Loading map specification...")
     spec = MapSpec.from_yaml(spec_path)
-    style = get_style(spec.designer_style)
+    style = get_style(spec.designer_style, font_scale=spec.font_scale)
 
     # 2. Select CRS and build hex grid
     status(f"Building hex grid ({spec.hex_size_km} km hexes)...")
