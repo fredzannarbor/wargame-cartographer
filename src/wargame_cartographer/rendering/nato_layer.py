@@ -1,14 +1,16 @@
-"""NATO layer: unit counters and movement arrows (optional)."""
+"""NATO layer: professional unit counters and movement arrows."""
 
 from __future__ import annotations
 
+import math
+
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyBboxPatch
+from matplotlib.patches import FancyBboxPatch, Rectangle
 from matplotlib.transforms import Bbox
 
 from wargame_cartographer.rendering.renderer import RenderContext
 
-# NATO unit type symbols (simplified)
+# Expanded NATO unit type symbols
 NATO_SYMBOLS = {
     "infantry": "X",
     "armor": "//",
@@ -18,6 +20,21 @@ NATO_SYMBOLS = {
     "marine": "~",
     "mechanized": "X/",
     "headquarters": "HQ",
+    "engineer": "E",
+    "signal": "S",
+    "medical": "+",
+    "supply": "[]",
+    "anti_armor": "//X",
+    "air_defense": "ADA",
+    "reconnaissance": "R",
+    "special_forces": "SF",
+    "air_fighter": "F",
+    "air_bomber": "B",
+    "air_helicopter": "H",
+    "air_transport": "T",
+    "naval_surface": "NS",
+    "naval_submarine": "SUB",
+    "naval_carrier": "CV",
 }
 
 UNIT_SIZES = {
@@ -35,16 +52,27 @@ UNIT_SIZES = {
 SIDE_COLORS = {
     "blue": ("#3366CC", "#FFFFFF"),
     "red": ("#CC3333", "#FFFFFF"),
+    "green": ("#338833", "#FFFFFF"),
+    "yellow": ("#CCAA33", "#000000"),
 }
 
 
 def _build_hex_lookup(grid) -> dict[str, tuple]:
-    """Build hex_id → (q, r, cell) lookup for fast access."""
+    """Build hex_id -> (q, r, cell) lookup for fast access."""
     lookup = {}
     for (q, r), cell in grid.cells.items():
         hex_id = grid.wargame_number(q, r)
         lookup[hex_id] = (q, r, cell)
     return lookup
+
+
+def _count_units_per_hex(units) -> dict[str, int]:
+    """Count how many units are stacked in each hex."""
+    counts: dict[str, int] = {}
+    for unit in units:
+        if unit.hex_id:
+            counts[unit.hex_id] = counts.get(unit.hex_id, 0) + 1
+    return counts
 
 
 def render_nato_layer(ax: plt.Axes, context: RenderContext):
@@ -56,15 +84,23 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
     r = grid.hex_radius_m
     hex_lookup = _build_hex_lookup(grid)
 
-    # Counter dimensions — fill most of the hex
-    counter_w = r * 1.2
-    counter_h = r * 0.85
+    # Counter dimensions based on hex proportion (Phase 0.2)
+    hex_flat_to_flat = r * math.sqrt(3)
+    counter_w = hex_flat_to_flat * context.spec.counter_hex_ratio
+    counter_h = counter_w  # Square counters (wargame standard)
 
-    # Font sizes scale with font_scale from spec
+    # Font sizes scale with counter size
     fs = context.spec.font_scale
-    symbol_fontsize = 8 * fs
-    size_fontsize = 5.5 * fs
-    desig_fontsize = 5 * fs
+    symbol_fontsize = max(6.0, 9.0 * fs * (context.spec.counter_hex_ratio / 0.65))
+    size_fontsize = max(5.0, 5.5 * fs * (context.spec.counter_hex_ratio / 0.65))
+    desig_fontsize = max(5.0, 5.5 * fs * (context.spec.counter_hex_ratio / 0.65))
+    factor_fontsize = max(5.0, 6.0 * fs * (context.spec.counter_hex_ratio / 0.65))
+
+    # Track stacking: offset multiple units in same hex
+    hex_stack_index: dict[str, int] = {}
+    units_per_hex = _count_units_per_hex(context.spec.nato_units)
+
+    has_shadow = getattr(context.style, 'counter_shadow', True)
 
     for unit in context.spec.nato_units:
         entry = hex_lookup.get(unit.hex_id)
@@ -72,11 +108,34 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
             continue
         q, row, cell = entry
 
+        # Stacking offset
+        stack_idx = hex_stack_index.get(unit.hex_id, 0)
+        hex_stack_index[unit.hex_id] = stack_idx + 1
+        stack_offset_y = stack_idx * counter_h * 0.15
+
+        cx = cell.center_x
+        cy = cell.center_y + stack_offset_y
+
         bg_color, text_color = SIDE_COLORS.get(unit.side, SIDE_COLORS["blue"])
 
-        # Counter box
+        # Drop shadow
+        if has_shadow:
+            shadow_offset = counter_w * 0.03
+            shadow = FancyBboxPatch(
+                (cx - counter_w / 2 + shadow_offset,
+                 cy - counter_h / 2 - shadow_offset),
+                counter_w, counter_h,
+                boxstyle="round,pad=0.01",
+                facecolor="#00000033",
+                edgecolor="none",
+                linewidth=0,
+                zorder=8.0,
+            )
+            ax.add_patch(shadow)
+
+        # Main counter box
         box = FancyBboxPatch(
-            (cell.center_x - counter_w / 2, cell.center_y - counter_h / 2),
+            (cx - counter_w / 2, cy - counter_h / 2),
             counter_w, counter_h,
             boxstyle="round,pad=0.01",
             facecolor=bg_color,
@@ -86,13 +145,39 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
         )
         ax.add_patch(box)
 
-        # Unit type symbol (center of counter)
+        # Nationality stripe at top
+        stripe_h = counter_h * 0.08
+        stripe = Rectangle(
+            (cx - counter_w / 2 + counter_w * 0.05,
+             cy + counter_h / 2 - stripe_h - counter_h * 0.02),
+            counter_w * 0.9, stripe_h,
+            facecolor=bg_color,
+            edgecolor="none",
+            alpha=0.8,
+            zorder=8.6,
+        )
+        ax.add_patch(stripe)
+
+        # White symbol area (center box)
+        sym_area_w = counter_w * 0.75
+        sym_area_h = counter_h * 0.40
+        sym_area = Rectangle(
+            (cx - sym_area_w / 2, cy - sym_area_h / 2 + counter_h * 0.05),
+            sym_area_w, sym_area_h,
+            facecolor="white",
+            edgecolor=bg_color,
+            linewidth=0.5,
+            zorder=8.7,
+        )
+        ax.add_patch(sym_area)
+
+        # Unit type symbol (center of white area)
         symbol = NATO_SYMBOLS.get(unit.unit_type, "?")
         ax.text(
-            cell.center_x, cell.center_y + counter_h * 0.05,
+            cx, cy + counter_h * 0.05,
             symbol,
             fontsize=symbol_fontsize,
-            color=text_color,
+            color="black",
             ha="center", va="center",
             fontfamily="sans-serif",
             fontweight="bold",
@@ -103,7 +188,7 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
         size_text = UNIT_SIZES.get(unit.size, "")
         if size_text:
             ax.text(
-                cell.center_x, cell.center_y + counter_h / 2 + r * 0.08,
+                cx, cy + counter_h / 2 + r * 0.06,
                 size_text,
                 fontsize=size_fontsize,
                 color="black",
@@ -111,12 +196,12 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
                 fontfamily="sans-serif",
                 fontweight="bold",
                 zorder=9,
-                bbox=dict(facecolor="white", alpha=0.7, edgecolor="none", pad=0.3),
+                bbox=dict(facecolor="white", alpha=0.8, edgecolor="none", pad=0.3),
             )
 
         # Designation below counter
         ax.text(
-            cell.center_x, cell.center_y - counter_h / 2 - r * 0.08,
+            cx, cy - counter_h / 2 - r * 0.06,
             unit.designation,
             fontsize=desig_fontsize,
             color="black",
@@ -124,32 +209,44 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
             fontfamily="sans-serif",
             fontweight="bold",
             zorder=9,
-            bbox=dict(facecolor="white", alpha=0.7, edgecolor="none", pad=0.3),
+            bbox=dict(facecolor="white", alpha=0.8, edgecolor="none", pad=0.3),
         )
 
-        # Combat/movement factors (bottom corners of counter)
+        # Combat/movement factors (bottom of counter, inside the box)
         if unit.combat_factor > 0 or unit.movement_factor > 0:
-            factor_fs = desig_fontsize * 0.85
-            # Combat factor (left)
+            # Left: combat factor
             ax.text(
-                cell.center_x - counter_w * 0.3,
-                cell.center_y - counter_h * 0.3,
+                cx - counter_w * 0.28,
+                cy - counter_h * 0.32,
                 str(unit.combat_factor),
-                fontsize=factor_fs,
+                fontsize=factor_fontsize,
+                color=text_color,
+                ha="center", va="center",
+                fontfamily="sans-serif",
+                fontweight="bold",
+                zorder=9,
+            )
+            # Separator dash
+            ax.text(
+                cx,
+                cy - counter_h * 0.32,
+                "-",
+                fontsize=factor_fontsize * 0.8,
                 color=text_color,
                 ha="center", va="center",
                 fontfamily="sans-serif",
                 zorder=9,
             )
-            # Movement factor (right)
+            # Right: movement factor
             ax.text(
-                cell.center_x + counter_w * 0.3,
-                cell.center_y - counter_h * 0.3,
+                cx + counter_w * 0.28,
+                cy - counter_h * 0.32,
                 str(unit.movement_factor),
-                fontsize=factor_fs,
+                fontsize=factor_fontsize,
                 color=text_color,
                 ha="center", va="center",
                 fontfamily="sans-serif",
+                fontweight="bold",
                 zorder=9,
             )
 
@@ -160,13 +257,12 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
 
 
 def _draw_movement_arrow(ax, grid, plan, hex_lookup, hex_radius):
-    """Draw a movement arrow along a hex path — thick red arrows."""
+    """Draw a movement arrow along a hex path."""
     if len(plan.hex_path) < 2:
         return
 
-    # Always red for movement arrows — highly visible
     color = "#CC0000"
-    line_width = max(6.0, hex_radius * 0.15 / 1000)  # Scale with hex size, min 6pt
+    line_width = max(6.0, hex_radius * 0.15 / 1000)
 
     centers = []
     for hex_id in plan.hex_path:
@@ -178,7 +274,6 @@ def _draw_movement_arrow(ax, grid, plan, hex_lookup, hex_radius):
     if len(centers) < 2:
         return
 
-    # Draw thick red line through all waypoints
     xs = [c[0] for c in centers]
     ys = [c[1] for c in centers]
 
@@ -192,7 +287,7 @@ def _draw_movement_arrow(ax, grid, plan, hex_lookup, hex_radius):
         solid_joinstyle="round",
     )
 
-    # Large arrowhead at the end
+    # Arrowhead at end
     dx = centers[-1][0] - centers[-2][0]
     dy = centers[-1][1] - centers[-2][1]
     ax.annotate(

@@ -56,7 +56,11 @@ def run_pipeline(
     status("Processing elevation data...")
     elev_proc = ElevationProcessor()
     elevation, elev_metadata = elev_proc.get_elevation(spec.bbox)
-    hillshade = elev_proc.compute_hillshade(elevation) if spec.show_elevation_shading else None
+    hillshade = elev_proc.compute_hillshade(
+        elevation,
+        azimuth=style.hillshade_azimuth,
+        altitude=style.hillshade_altitude,
+    ) if spec.show_elevation_shading else None
 
     # 5. Classify terrain per hex
     status("Classifying terrain...")

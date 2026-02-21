@@ -1,4 +1,4 @@
-"""Terrain layer: colored hex fills with custom terrain patterns and coastal contours."""
+"""Terrain layer: colored hex fills with hatching, custom terrain patterns, and coastal contours."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import math
 import hashlib
 
 import matplotlib.pyplot as plt
-from matplotlib.patches import PathPatch, Circle, FancyBboxPatch
+from matplotlib.patches import PathPatch, Circle, FancyBboxPatch, Polygon as MplPolygon
 from matplotlib.path import Path as MplPath
 import numpy as np
 from shapely.geometry import Polygon, MultiPolygon, Point
@@ -18,21 +18,13 @@ from wargame_cartographer.terrain.types import TerrainType
 
 
 def _build_coastal_data(context: RenderContext):
-    """Build projected land+lake polygons for coastal contour rendering.
-
-    Clips global Natural Earth polygons to the map bbox BEFORE projecting,
-    then projects the clipped geometry to the grid CRS.
-
-    Returns (land_proj, lake_proj) as shapely geometries in projected CRS,
-    or (None, None) if vector data is unavailable.
-    """
+    """Build projected land+lake polygons for coastal contour rendering."""
     if context.vector_data is None:
         return None, None
 
     bbox = context.spec.bbox
     transformer = context.grid._to_proj
 
-    # Build a bbox polygon in WGS84 for clipping (with small buffer)
     from shapely.geometry import box as shapely_box
     clip_box = shapely_box(
         bbox.min_lon - 0.5, bbox.min_lat - 0.5,
@@ -40,18 +32,15 @@ def _build_coastal_data(context: RenderContext):
     )
 
     def _clip_and_project_gdf(gdf):
-        """Clip GeoDataFrame to bbox in WGS84, then project to grid CRS."""
         polys = []
         for _, row in gdf.iterrows():
             geom = row.geometry
             if geom is None:
                 continue
             try:
-                # Clip to bbox in WGS84 first
                 clipped = geom.intersection(clip_box)
                 if clipped.is_empty:
                     continue
-                # Now project the clipped geometry
                 projected = _project_polygon(clipped, transformer)
                 if projected is not None and projected.is_valid and not projected.is_empty:
                     polys.append(projected)
@@ -96,8 +85,18 @@ def _project_polygon(geom, transformer):
     return None
 
 
+def _should_decorate(context: RenderContext, q: int, row: int) -> bool:
+    """Check if a hex should get terrain decorations."""
+    if context.skip_decorations:
+        return False
+    hex_id = context.grid.wargame_number(q, row)
+    if hex_id in context.occupied_hexes:
+        return False
+    return True
+
+
 def render_terrain_layer(ax: plt.Axes, context: RenderContext):
-    """Draw terrain-colored hex fills with custom decorative patterns."""
+    """Draw terrain-colored hex fills with hatching and decorative patterns."""
     style = context.style
     grid = context.grid
     r = grid.hex_radius_m
@@ -121,8 +120,7 @@ def render_terrain_layer(ax: plt.Axes, context: RenderContext):
         terrain = terrain_info.get("terrain", TerrainType.CLEAR)
         color = style.terrain_colors.get(terrain, "#F5EDD5")
 
-        # Check if this is a coastal hex (water hex that intersects land,
-        # or land hex that intersects water)
+        # Check if this is a coastal hex
         is_coastal = False
         hex_poly = None
 
@@ -131,16 +129,13 @@ def render_terrain_layer(ax: plt.Axes, context: RenderContext):
             if hex_poly.is_valid:
                 try:
                     if terrain == TerrainType.WATER:
-                        # Water hex: check if any land intrudes
                         is_coastal = land_prepared.intersects(hex_poly) and not land_prepared.contains(hex_poly)
                     else:
-                        # Land hex: check if it's partially over water
                         is_coastal = not land_prepared.contains(hex_poly) and land_prepared.intersects(hex_poly)
                 except Exception:
                     is_coastal = False
 
         if is_coastal and hex_poly is not None:
-            # Draw coastal hex with actual coastline contour
             _draw_coastal_hex(ax, context, hex_poly, verts_arr, codes, terrain, land_proj, lake_proj)
         else:
             # Standard solid fill
@@ -153,20 +148,39 @@ def render_terrain_layer(ax: plt.Axes, context: RenderContext):
             )
             ax.add_patch(patch)
 
+        # Terrain hatching overlay (Phase 1.1)
+        hatch = style.terrain_hatches.get(terrain)
+        if hatch:
+            hatch_patch = PathPatch(
+                path,
+                facecolor="none",
+                edgecolor=style.grid_color,
+                hatch=hatch,
+                linewidth=0,
+                alpha=0.3,
+                zorder=1.05,
+            )
+            ax.add_patch(hatch_patch)
+
         cell = grid.cells[(q, row)]
         cx, cy = cell.center_x, cell.center_y
 
-        # Custom terrain decorations (skip for water hexes)
-        if terrain == TerrainType.URBAN:
-            _draw_urban_grid(ax, cx, cy, r)
-        elif terrain == TerrainType.FOREST:
-            _draw_forest_trees(ax, cx, cy, r, q, row)
-        elif terrain == TerrainType.ROUGH:
-            _draw_rough_blotches(ax, cx, cy, r, q, row)
+        # Custom terrain decorations (skip for water; skip if hex too small or has counter)
+        if _should_decorate(context, q, row):
+            if terrain == TerrainType.URBAN:
+                _draw_urban_grid(ax, cx, cy, r)
+            elif terrain == TerrainType.FOREST:
+                _draw_forest_trees(ax, cx, cy, r, q, row)
+            elif terrain == TerrainType.ROUGH:
+                _draw_rough_blotches(ax, cx, cy, r, q, row)
+            elif terrain == TerrainType.MOUNTAIN:
+                _draw_mountain_peaks(ax, cx, cy, r, q, row)
+            elif terrain == TerrainType.MARSH:
+                _draw_marsh_reeds(ax, cx, cy, r, q, row)
 
 
 def _draw_coastal_hex(ax, context, hex_poly, verts_arr, codes, terrain, land_proj, lake_proj):
-    """Draw a hex with actual coastline contour: land part in land color, water part in water color."""
+    """Draw a hex with actual coastline contour."""
     style = context.style
     water_color = style.water_color
     land_color = style.terrain_colors.get(TerrainType.CLEAR, "#F5EDD5")
@@ -174,17 +188,14 @@ def _draw_coastal_hex(ax, context, hex_poly, verts_arr, codes, terrain, land_pro
     hex_path = MplPath(verts_arr, codes)
 
     try:
-        # Compute land portion within this hex
         land_in_hex = hex_poly.intersection(land_proj)
 
-        # Subtract lakes from land
         if lake_proj is not None:
             try:
                 land_in_hex = land_in_hex.difference(lake_proj)
             except Exception:
                 pass
 
-        # First: fill entire hex with water color
         water_patch = PathPatch(
             hex_path,
             facecolor=water_color,
@@ -194,12 +205,10 @@ def _draw_coastal_hex(ax, context, hex_poly, verts_arr, codes, terrain, land_pro
         )
         ax.add_patch(water_patch)
 
-        # Then: overlay land portion with land color
         if not land_in_hex.is_empty:
             _draw_shapely_polygon(ax, land_in_hex, land_color, zorder=1.1)
 
     except Exception:
-        # Fallback: just fill with terrain color
         fallback_color = style.terrain_colors.get(terrain, "#F5EDD5")
         patch = PathPatch(
             hex_path,
@@ -220,7 +229,6 @@ def _draw_shapely_polygon(ax, geom, color, zorder=1.1):
         if len(ext) < 3:
             return
 
-        # Build path with exterior + holes
         all_verts = list(ext)
         all_codes = [MplPath.MOVETO] + [MplPath.LINETO] * (len(ext) - 2) + [MplPath.CLOSEPOLY]
 
@@ -241,7 +249,6 @@ def _draw_shapely_polygon(ax, geom, color, zorder=1.1):
             _draw_shapely_polygon(ax, poly, color, zorder=zorder)
 
     elif hasattr(geom, 'geoms'):
-        # GeometryCollection — draw any polygon parts
         for part in geom.geoms:
             if isinstance(part, (Polygon, MultiPolygon)):
                 _draw_shapely_polygon(ax, part, color, zorder=zorder)
@@ -249,7 +256,6 @@ def _draw_shapely_polygon(ax, geom, color, zorder=1.1):
 
 def _draw_urban_grid(ax, cx, cy, r):
     """Draw a black-and-white street grid pattern inside the hex."""
-    # White base
     size = r * 0.55
     rect = FancyBboxPatch(
         (cx - size, cy - size), size * 2, size * 2,
@@ -261,19 +267,15 @@ def _draw_urban_grid(ax, cx, cy, r):
     )
     ax.add_patch(rect)
 
-    # Grid lines — streets
     spacing = r * 0.22
     line_kw = dict(color="#333333", linewidth=0.6, zorder=1.3, alpha=0.8)
-    # Horizontal streets
     for offset in np.arange(-size, size + spacing, spacing):
         y = cy + offset
         ax.plot([cx - size, cx + size], [y, y], **line_kw)
-    # Vertical streets
     for offset in np.arange(-size, size + spacing, spacing):
         x = cx + offset
         ax.plot([x, x], [cy - size, cy + size], **line_kw)
 
-    # City block fills (dark grey small rectangles)
     block_size = spacing * 0.35
     for xo in np.arange(-size + spacing * 0.3, size, spacing):
         for yo in np.arange(-size + spacing * 0.3, size, spacing):
@@ -292,7 +294,6 @@ def _draw_urban_grid(ax, cx, cy, r):
 
 def _draw_forest_trees(ax, cx, cy, r, q, row):
     """Draw curly organic tree canopy blobs scattered in the hex."""
-    # Deterministic pseudo-random positions
     seed = int(hashlib.md5(f"{q},{row}".encode()).hexdigest()[:8], 16)
     rng = np.random.RandomState(seed)
 
@@ -300,20 +301,16 @@ def _draw_forest_trees(ax, cx, cy, r, q, row):
     spread = r * 0.50
 
     for i in range(n_trees):
-        # Random offset within hex, clustered near center
         tx = cx + rng.uniform(-spread, spread)
         ty = cy + rng.uniform(-spread, spread)
 
-        # Curly canopy: overlapping irregular circles with wavy edges
         canopy_r = r * rng.uniform(0.10, 0.18)
         n_lobes = 8 + rng.randint(0, 5)
         angles = np.linspace(0, 2 * math.pi, n_lobes * 4, endpoint=False)
-        # Wavy radius variation for organic look
         radii = canopy_r * (1.0 + 0.25 * np.sin(angles * n_lobes) + 0.1 * rng.randn(len(angles)))
         xs = tx + radii * np.cos(angles)
         ys = ty + radii * np.sin(angles)
 
-        # Darker green canopy fill — softer than before
         ax.fill(
             xs, ys,
             color="#3D7A3D",
@@ -323,7 +320,6 @@ def _draw_forest_trees(ax, cx, cy, r, q, row):
             linewidth=0.3,
         )
 
-        # Lighter highlight lobe on top for depth
         highlight_r = canopy_r * 0.5
         hx = tx + rng.uniform(-canopy_r * 0.2, canopy_r * 0.2)
         hy = ty + canopy_r * 0.3
@@ -347,7 +343,6 @@ def _draw_rough_blotches(ax, cx, cy, r, q, row):
         by = cy + rng.uniform(-spread, spread)
         blob_r = r * rng.uniform(0.06, 0.14)
 
-        # Irregular blob: circle with varying radius
         angles = np.linspace(0, 2 * math.pi, 12)
         radii = blob_r * (1.0 + 0.3 * rng.randn(12))
         xs = bx + radii * np.cos(angles)
@@ -361,3 +356,97 @@ def _draw_rough_blotches(ax, cx, cy, r, q, row):
             edgecolor="#8B7040",
             linewidth=0.3,
         )
+
+
+def _draw_mountain_peaks(ax, cx, cy, r, q, row):
+    """Draw small triangular peak marks with snow caps for mountain terrain."""
+    seed = int(hashlib.md5(f"mtn_{q},{row}".encode()).hexdigest()[:8], 16)
+    rng = np.random.RandomState(seed)
+
+    n_peaks = 4
+    spread = r * 0.45
+
+    for i in range(n_peaks):
+        px = cx + rng.uniform(-spread, spread)
+        py = cy + rng.uniform(-spread, spread)
+        peak_h = r * rng.uniform(0.15, 0.28)
+        peak_w = peak_h * rng.uniform(0.8, 1.4)
+
+        # Mountain triangle
+        tri_xs = [px - peak_w / 2, px, px + peak_w / 2]
+        tri_ys = [py - peak_h * 0.3, py + peak_h * 0.7, py - peak_h * 0.3]
+        ax.fill(
+            tri_xs, tri_ys,
+            color="#6B5B4B",
+            alpha=0.7,
+            zorder=1.3,
+            edgecolor="#4A3A2A",
+            linewidth=0.4,
+        )
+
+        # Snow cap at top
+        cap_h = peak_h * 0.25
+        cap_w = peak_w * 0.3
+        cap_xs = [px - cap_w / 2, px, px + cap_w / 2]
+        cap_ys = [py + peak_h * 0.7 - cap_h, py + peak_h * 0.7, py + peak_h * 0.7 - cap_h]
+        ax.fill(
+            cap_xs, cap_ys,
+            color="white",
+            alpha=0.8,
+            zorder=1.35,
+            edgecolor="none",
+        )
+
+    # Ridgeline between peaks
+    if n_peaks >= 2:
+        ridge_y = cy + r * 0.1
+        ax.plot(
+            [cx - spread * 0.6, cx + spread * 0.6],
+            [ridge_y, ridge_y + r * 0.05],
+            color="#5A4A3A",
+            linewidth=0.5,
+            alpha=0.5,
+            zorder=1.25,
+        )
+
+
+def _draw_marsh_reeds(ax, cx, cy, r, q, row):
+    """Draw horizontal grass tufts with wavy water lines for marsh terrain."""
+    seed = int(hashlib.md5(f"marsh_{q},{row}".encode()).hexdigest()[:8], 16)
+    rng = np.random.RandomState(seed)
+
+    spread = r * 0.45
+
+    # Wavy water lines
+    n_waves = 3
+    for i in range(n_waves):
+        wy = cy + rng.uniform(-spread * 0.6, spread * 0.6)
+        wave_xs = np.linspace(cx - spread, cx + spread, 30)
+        wave_ys = wy + r * 0.03 * np.sin(wave_xs / (r * 0.12))
+        ax.plot(
+            wave_xs, wave_ys,
+            color="#4A90D9",
+            linewidth=0.5,
+            alpha=0.5,
+            zorder=1.25,
+        )
+
+    # Grass tufts
+    n_tufts = 5
+    for i in range(n_tufts):
+        tx = cx + rng.uniform(-spread, spread)
+        ty = cy + rng.uniform(-spread, spread)
+        tuft_h = r * rng.uniform(0.08, 0.15)
+
+        n_blades = rng.randint(3, 6)
+        for b in range(n_blades):
+            angle = rng.uniform(-0.4, 0.4)
+            bx = tx + tuft_h * 0.3 * math.sin(angle)
+            by_top = ty + tuft_h * math.cos(angle)
+            ax.plot(
+                [tx, bx], [ty, by_top],
+                color="#4A6A3A",
+                linewidth=0.6,
+                alpha=0.7,
+                zorder=1.3,
+            )

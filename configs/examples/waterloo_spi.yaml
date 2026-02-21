@@ -1,0 +1,344 @@
+name: "Waterloo 1815"
+title: "NAPOLEON AT WATERLOO"
+subtitle: "The Hundred Days Campaign"
+scenario: "June 18, 1815 — The Final Battle"
+
+bbox:
+  min_lon: 4.33
+  min_lat: 50.63
+  max_lon: 4.52
+  max_lat: 50.72
+
+map_style: hex
+designer_style: simonsen
+hex_size_km: 0.5
+
+# SPI-style small game map
+map_size: "17x22"
+map_orientation: landscape
+dpi: 300
+font_scale: 1.2
+
+# Hex readability
+min_hex_px: 50
+counter_hex_ratio: 0.60
+
+show_elevation_shading: true
+show_rivers: true
+show_roads: true
+show_railways: false
+show_cities: true
+show_ports: false
+show_airfields: false
+show_hex_numbers: true
+show_legend: true
+show_scale_bar: true
+show_compass: true
+
+# Anglo-Allied Army (Wellington) — Blue
+# French Army (Napoleon) — Red
+nato_units:
+  # === ANGLO-ALLIED FORCES (Blue) ===
+  # Wellington's line along the ridge north of La Belle Alliance
+
+  # I Corps (Prince of Orange) — right-center
+  - designation: "1st Div"
+    unit_type: infantry
+    size: division
+    hex_id: "1808"
+    side: blue
+    combat_factor: 6
+    movement_factor: 3
+
+  - designation: "3rd Div"
+    unit_type: infantry
+    size: division
+    hex_id: "1908"
+    side: blue
+    combat_factor: 6
+    movement_factor: 3
+
+  # II Corps (Hill) — right flank
+  - designation: "2nd Div"
+    unit_type: infantry
+    size: division
+    hex_id: "1509"
+    side: blue
+    combat_factor: 5
+    movement_factor: 3
+
+  - designation: "4th Div"
+    unit_type: infantry
+    size: division
+    hex_id: "1609"
+    side: blue
+    combat_factor: 5
+    movement_factor: 3
+
+  # Reserve — behind the ridge
+  - designation: "5th Div"
+    unit_type: infantry
+    size: division
+    hex_id: "1707"
+    side: blue
+    combat_factor: 5
+    movement_factor: 3
+
+  - designation: "6th Div"
+    unit_type: infantry
+    size: division
+    hex_id: "1807"
+    side: blue
+    combat_factor: 4
+    movement_factor: 3
+
+  # Brunswick Corps
+  - designation: "Brunswick"
+    unit_type: infantry
+    size: division
+    hex_id: "1607"
+    side: blue
+    combat_factor: 4
+    movement_factor: 3
+
+  # Nassau contingent
+  - designation: "Nassau"
+    unit_type: infantry
+    size: brigade
+    hex_id: "2008"
+    side: blue
+    combat_factor: 3
+    movement_factor: 3
+
+  # Cavalry Reserve (Uxbridge)
+  - designation: "Cav Res"
+    unit_type: cavalry
+    size: division
+    hex_id: "1708"
+    side: blue
+    combat_factor: 4
+    movement_factor: 5
+
+  # Household & Union Brigades
+  - designation: "Hvy Cav"
+    unit_type: cavalry
+    size: brigade
+    hex_id: "1808"
+    side: blue
+    combat_factor: 5
+    movement_factor: 5
+
+  # Allied Artillery
+  - designation: "RA"
+    unit_type: artillery
+    size: brigade
+    hex_id: "1709"
+    side: blue
+    combat_factor: 4
+    movement_factor: 2
+
+  # === FRENCH ARMY (Red) ===
+  # Napoleon's army deployed south of La Belle Alliance
+
+  # I Corps (d'Erlon) — French right
+  - designation: "d'Erlon"
+    unit_type: infantry
+    size: corps
+    hex_id: "1812"
+    side: red
+    combat_factor: 9
+    movement_factor: 3
+
+  # II Corps (Reille) — French left
+  - designation: "Reille"
+    unit_type: infantry
+    size: corps
+    hex_id: "1412"
+    side: red
+    combat_factor: 8
+    movement_factor: 3
+
+  # VI Corps (Lobau) — Reserve
+  - designation: "Lobau"
+    unit_type: infantry
+    size: corps
+    hex_id: "1613"
+    side: red
+    combat_factor: 6
+    movement_factor: 3
+
+  # Imperial Guard Infantry
+  - designation: "Gd Inf"
+    unit_type: infantry
+    size: division
+    hex_id: "1614"
+    side: red
+    combat_factor: 8
+    movement_factor: 3
+
+  # Imperial Guard Cavalry
+  - designation: "Gd Cav"
+    unit_type: cavalry
+    size: division
+    hex_id: "1714"
+    side: red
+    combat_factor: 6
+    movement_factor: 5
+
+  # III Cavalry Corps (Kellermann)
+  - designation: "Kellermann"
+    unit_type: cavalry
+    size: corps
+    hex_id: "1413"
+    side: red
+    combat_factor: 5
+    movement_factor: 5
+
+  # IV Cavalry Corps (Milhaud)
+  - designation: "Milhaud"
+    unit_type: cavalry
+    size: corps
+    hex_id: "1813"
+    side: red
+    combat_factor: 5
+    movement_factor: 5
+
+  # Grand Battery
+  - designation: "Gd Bty"
+    unit_type: artillery
+    size: brigade
+    hex_id: "1611"
+    side: red
+    combat_factor: 6
+    movement_factor: 2
+
+  # Reserve Artillery
+  - designation: "Art Res"
+    unit_type: artillery
+    size: brigade
+    hex_id: "1711"
+    side: red
+    combat_factor: 4
+    movement_factor: 2
+
+# OOB side panel
+show_oob_panel: true
+oob_panel_position: right
+oob_panel_width_ratio: 0.22
+
+oob_data:
+  - side: blue
+    formation: "I Corps (Prince of Orange)"
+    setup_zone: "Center-Right"
+    units:
+      - designation: "1st Division"
+        unit_type: infantry
+        size: division
+        combat_factor: 6
+        movement_factor: 3
+      - designation: "3rd Division"
+        unit_type: infantry
+        size: division
+        combat_factor: 6
+        movement_factor: 3
+
+  - side: blue
+    formation: "II Corps (Hill)"
+    setup_zone: "Right Flank"
+    units:
+      - designation: "2nd Division"
+        unit_type: infantry
+        size: division
+        combat_factor: 5
+        movement_factor: 3
+      - designation: "4th Division"
+        unit_type: infantry
+        size: division
+        combat_factor: 5
+        movement_factor: 3
+
+  - side: blue
+    formation: "Reserve (Wellington)"
+    setup_zone: "Behind Ridge"
+    units:
+      - designation: "5th Division"
+        unit_type: infantry
+        size: division
+        combat_factor: 5
+        movement_factor: 3
+      - designation: "6th Division"
+        unit_type: infantry
+        size: division
+        combat_factor: 4
+        movement_factor: 3
+      - designation: "Brunswick Corps"
+        unit_type: infantry
+        size: division
+        combat_factor: 4
+        movement_factor: 3
+      - designation: "Cavalry Reserve"
+        unit_type: cavalry
+        size: division
+        combat_factor: 4
+        movement_factor: 5
+
+  - side: red
+    formation: "I Corps (d'Erlon)"
+    setup_zone: "French Right"
+    units:
+      - designation: "I Corps"
+        unit_type: infantry
+        size: corps
+        combat_factor: 9
+        movement_factor: 3
+
+  - side: red
+    formation: "II Corps (Reille)"
+    setup_zone: "French Left"
+    units:
+      - designation: "II Corps"
+        unit_type: infantry
+        size: corps
+        combat_factor: 8
+        movement_factor: 3
+
+  - side: red
+    formation: "Reserve (Napoleon)"
+    setup_zone: "Behind La Belle Alliance"
+    units:
+      - designation: "VI Corps (Lobau)"
+        unit_type: infantry
+        size: corps
+        combat_factor: 6
+        movement_factor: 3
+      - designation: "Imperial Guard"
+        unit_type: infantry
+        size: division
+        combat_factor: 8
+        movement_factor: 3
+      - designation: "Guard Cavalry"
+        unit_type: cavalry
+        size: division
+        combat_factor: 6
+        movement_factor: 5
+      - designation: "Grand Battery"
+        unit_type: artillery
+        size: brigade
+        combat_factor: 6
+        movement_factor: 2
+
+# Game module panels
+show_module_panels: true
+module_panel_position: bottom
+module_panels:
+  - panel_type: crt
+    title: "COMBAT RESULTS TABLE"
+  - panel_type: tec
+    title: "TERRAIN EFFECTS CHART"
+
+output_formats:
+  - png
+  - html
+  - json
+
+output_dir: ./output
