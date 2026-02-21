@@ -1,0 +1,21 @@
+{
+  "name": "wargame-cartographer",
+  "version": "1.0.0",
+  "description": "Generate historically accurate, playable wargame-style hex maps for any geographic area at any scale.",
+  "author": {
+    "name": "Fred Zimmerman",
+    "url": "https://github.com/fredzannarbor"
+  },
+  "repository": "https://github.com/fredzannarbor/wargame-cartographer",
+  "license": "MIT",
+  "keywords": [
+    "wargame",
+    "hex-map",
+    "cartography",
+    "terrain",
+    "military-history",
+    "board-game",
+    "map-generation"
+  ],
+  "skills": "./skills/"
+}

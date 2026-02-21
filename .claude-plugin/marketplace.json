@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "wargame-cartographer",
+  "version": "1.0.0",
+  "description": "Generate historically accurate, playable wargame-style hex maps for any geographic area at any scale",
+  "owner": {
+    "name": "Fred Zimmerman",
+    "email": "nimblebooks@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "wargame-cartographer",
+      "description": "Generate wargame-style hex maps with terrain classification, elevation shading, and multiple output formats (PNG, PDF, HTML, JSON). Supports Simonitch, Simonsen, and Kibler visual styles.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Fred Zimmerman",
+        "url": "https://github.com/fredzannarbor"
+      },
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}
