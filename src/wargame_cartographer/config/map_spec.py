@@ -101,6 +101,7 @@ class OOBUnit(BaseModel):
     combat_factor: int = 0
     movement_factor: int = 0
     setup_hex: str = ""
+    strength: str = ""
 
 
 class OOBEntry(BaseModel):
@@ -174,6 +175,7 @@ class MapSpec(BaseModel):
     oob_panel_position: Literal["right", "left", "bottom"] = "right"
     oob_panel_width_ratio: float = 0.25
     oob_data: list[OOBEntry] | None = None
+    oob_commentary: list[str] | None = None
 
     show_module_panels: bool = False
     module_panel_position: Literal["bottom", "right", "left"] = "bottom"

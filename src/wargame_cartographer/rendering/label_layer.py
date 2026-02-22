@@ -13,12 +13,14 @@ def render_label_layer(ax: plt.Axes, context: RenderContext):
     """Draw hex numbers and city name labels with collision avoidance."""
     style = context.style
     grid = context.grid
+    typo = style.typography
 
     # Track placed label bounding boxes for collision avoidance
     placed_bboxes: list[tuple[float, float, float, float]] = []
 
     # Hex numbers
     if context.spec.show_hex_numbers:
+        ts = typo.hex_number
         for (q, r), cell in grid.cells.items():
             number = grid.wargame_number(q, r)
             hex_id = number
@@ -27,26 +29,25 @@ def render_label_layer(ax: plt.Axes, context: RenderContext):
             y_offset = grid.hex_radius_m * 0.65
             label_x = cell.center_x
             label_y = cell.center_y + y_offset
-            fontsize = style.hex_number_fontsize
+            fontsize = ts.fontsize
             label_alpha = 1.0
 
             # If counter occupies this hex, shift number to top-left corner
             if hex_id in context.occupied_hexes:
-                # Move to upper-left corner of hex (vertex 2 area for flat-top)
                 label_x = cell.center_x - grid.hex_radius_m * 0.55
                 label_y = cell.center_y + grid.hex_radius_m * 0.70
-                fontsize = style.hex_number_fontsize * 0.85
+                fontsize = ts.fontsize * 0.85
 
             ax.text(
                 label_x,
                 label_y,
                 number,
                 fontsize=fontsize,
-                color=style.hex_number_color,
+                color=ts.color,
                 ha="center",
                 va="center",
-                fontfamily="sans-serif",
-                fontweight="normal",
+                fontfamily=ts.fontfamily,
+                fontweight=ts.fontweight,
                 zorder=6,
                 bbox=dict(
                     facecolor="white",
@@ -61,6 +62,7 @@ def render_label_layer(ax: plt.Axes, context: RenderContext):
         if hasattr(context.vector_data, 'cities') and not context.vector_data.cities.empty:
             transformer = grid._to_proj
             r = grid.hex_radius_m
+            ts_city = typo.city_label
 
             # 8 candidate offset positions (data coords)
             offsets = [
@@ -98,7 +100,6 @@ def render_label_layer(ax: plt.Axes, context: RenderContext):
                         placed_bboxes.append(lbox)
                         break
                 else:
-                    # All positions overlap, use default
                     best_x, best_y = px + offsets[0][0], py + offsets[0][1]
                     lbox = (best_x - label_w / 2, best_y - label_h / 2,
                             best_x + label_w / 2, best_y + label_h / 2)
@@ -108,12 +109,9 @@ def render_label_layer(ax: plt.Axes, context: RenderContext):
                     best_x,
                     best_y,
                     name,
-                    fontsize=style.city_label_fontsize,
-                    color=style.city_label_color,
+                    **ts_city.mpl_kwargs(),
                     ha="center",
                     va="top",
-                    fontfamily="sans-serif",
-                    fontweight="bold",
                     zorder=6,
                     bbox=dict(
                         facecolor="white",

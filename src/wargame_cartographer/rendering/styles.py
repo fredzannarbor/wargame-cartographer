@@ -8,6 +8,117 @@ from typing import Literal
 from wargame_cartographer.terrain.types import TerrainType
 
 
+# ---------------------------------------------------------------------------
+# TextStyle: atomic unit of typography
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class TextStyle:
+    """Font specification for a single text role."""
+
+    fontsize: float = 10.0
+    fontfamily: str = "sans-serif"
+    fontweight: str = "normal"
+    fontstyle: str = "normal"
+    color: str = "#000000"
+
+    def mpl_kwargs(self, **overrides) -> dict:
+        """Return a dict suitable for unpacking into ax.text()."""
+        kw = {
+            "fontsize": self.fontsize,
+            "fontfamily": self.fontfamily,
+            "fontweight": self.fontweight,
+            "fontstyle": self.fontstyle,
+            "color": self.color,
+        }
+        kw.update(overrides)
+        return kw
+
+    def scaled(self, factor: float) -> TextStyle:
+        """Return a copy with fontsize multiplied by *factor*."""
+        return TextStyle(
+            fontsize=self.fontsize * factor,
+            fontfamily=self.fontfamily,
+            fontweight=self.fontweight,
+            fontstyle=self.fontstyle,
+            color=self.color,
+        )
+
+
+# ---------------------------------------------------------------------------
+# Typography: named text roles for every element on the map
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class Typography:
+    """Complete typography specification — one TextStyle per visual role."""
+
+    # --- Title block ---
+    title: TextStyle = TextStyle(fontsize=13.0, fontfamily="sans-serif", fontweight="bold", color="#222222")
+    subtitle: TextStyle = TextStyle(fontsize=6.5, fontfamily="sans-serif", color="#444444")
+    scenario: TextStyle = TextStyle(fontsize=5.2, fontfamily="sans-serif", fontstyle="italic", color="#666666")
+    scale_label: TextStyle = TextStyle(fontsize=4.5, fontfamily="sans-serif", color="#000000")
+    scale_text: TextStyle = TextStyle(fontsize=3.4, fontfamily="monospace", color="#666666")
+
+    # --- Legend ---
+    legend_header: TextStyle = TextStyle(fontsize=17.0, fontfamily="sans-serif", fontweight="bold", color="#333333")
+    legend_label: TextStyle = TextStyle(fontsize=15.0, fontfamily="sans-serif", color="#000000")
+
+    # --- Map labels ---
+    hex_number: TextStyle = TextStyle(fontsize=6.5, fontfamily="sans-serif", color="#555555")
+    city_label: TextStyle = TextStyle(fontsize=9.0, fontfamily="sans-serif", fontweight="bold", color="#222222")
+
+    # --- Compass & coordinates ---
+    compass_label: TextStyle = TextStyle(fontsize=11.0, fontfamily="sans-serif", fontweight="bold", color="#333333")
+    coord_tick: TextStyle = TextStyle(fontsize=8.0, fontfamily="monospace", color="#444444")
+
+    # --- NATO counters (base sizes — scaled by counter_hex_ratio / 0.65 at render) ---
+    counter_symbol: TextStyle = TextStyle(fontsize=9.0, fontfamily="sans-serif", fontweight="bold", color="#000000")
+    counter_size_indicator: TextStyle = TextStyle(fontsize=5.5, fontfamily="sans-serif", fontweight="bold", color="#000000")
+    counter_designation: TextStyle = TextStyle(fontsize=5.5, fontfamily="sans-serif", fontweight="bold", color="#000000")
+    counter_factor: TextStyle = TextStyle(fontsize=6.0, fontfamily="sans-serif", fontweight="bold", color="#000000")
+    counter_separator: TextStyle = TextStyle(fontsize=4.8, fontfamily="sans-serif", color="#000000")
+
+    # --- OOB panel (horizontal / bottom) ---
+    oob_title: TextStyle = TextStyle(fontsize=13.0, fontfamily="sans-serif", fontweight="bold", color="#FFFFFF")
+    oob_side_header: TextStyle = TextStyle(fontsize=10.0, fontfamily="sans-serif", fontweight="bold", color="#000000")
+    oob_formation: TextStyle = TextStyle(fontsize=9.0, fontfamily="sans-serif", fontweight="bold", color="#333333")
+    oob_unit: TextStyle = TextStyle(fontsize=7.5, fontfamily="sans-serif", color="#444444")
+    oob_notes: TextStyle = TextStyle(fontsize=7.0, fontfamily="sans-serif", fontstyle="italic", color="#666666")
+    oob_commentary_header: TextStyle = TextStyle(fontsize=10.0, fontfamily="sans-serif", fontweight="bold", color="#333333")
+    oob_commentary_text: TextStyle = TextStyle(fontsize=7.0, fontfamily="sans-serif", color="#444444")
+
+    # --- OOB panel (vertical / side) — larger sizes for narrower layout ---
+    oob_v_title: TextStyle = TextStyle(fontsize=14.0, fontfamily="sans-serif", fontweight="bold", color="#000000")
+    oob_v_side_header: TextStyle = TextStyle(fontsize=12.0, fontfamily="sans-serif", fontweight="bold", color="#000000")
+    oob_v_formation: TextStyle = TextStyle(fontsize=10.0, fontfamily="sans-serif", fontweight="bold", color="#333333")
+    oob_v_unit: TextStyle = TextStyle(fontsize=9.0, fontfamily="sans-serif", color="#444444")
+    oob_v_notes: TextStyle = TextStyle(fontsize=8.0, fontfamily="sans-serif", fontstyle="italic", color="#666666")
+    oob_v_commentary_header: TextStyle = TextStyle(fontsize=12.0, fontfamily="sans-serif", fontweight="bold", color="#333333")
+    oob_v_commentary_text: TextStyle = TextStyle(fontsize=8.0, fontfamily="sans-serif", color="#444444")
+
+    # --- Module panels ---
+    panel_title: TextStyle = TextStyle(fontsize=10.0, fontfamily="sans-serif", fontweight="bold", color="#000000")
+    panel_header: TextStyle = TextStyle(fontsize=7.0, fontfamily="sans-serif", fontweight="bold", color="#000000")
+    panel_cell: TextStyle = TextStyle(fontsize=6.0, fontfamily="sans-serif", color="#000000")
+    panel_detail: TextStyle = TextStyle(fontsize=5.0, fontfamily="sans-serif", color="#000000")
+    panel_phase_number: TextStyle = TextStyle(fontsize=9.0, fontfamily="sans-serif", fontweight="bold", color="#333333")
+    panel_phase_name: TextStyle = TextStyle(fontsize=8.0, fontfamily="sans-serif", fontweight="bold", color="#333333")
+    panel_phase_desc: TextStyle = TextStyle(fontsize=6.0, fontfamily="sans-serif", color="#666666")
+
+    def scaled(self, factor: float) -> Typography:
+        """Return a copy with all font sizes multiplied by *factor*."""
+        kwargs = {}
+        for fname in self.__dataclass_fields__:
+            ts: TextStyle = getattr(self, fname)
+            kwargs[fname] = ts.scaled(factor)
+        return Typography(**kwargs)
+
+
+# ---------------------------------------------------------------------------
+# WargameStyle
+# ---------------------------------------------------------------------------
+
 @dataclass(frozen=True)
 class WargameStyle:
     """Complete visual specification for a designer style."""
@@ -20,6 +131,9 @@ class WargameStyle:
     # Terrain hatch patterns (matplotlib hatch strings, None = solid fill)
     terrain_hatches: dict[TerrainType, str | None]
 
+    # Typography (all text roles)
+    typography: Typography = Typography()
+
     # Grid
     grid_color: str = "#8B7355"
     grid_linewidth: float = 0.4
@@ -28,12 +142,12 @@ class WargameStyle:
     # Water
     water_color: str = "#7BB3D0"
 
-    # Typography
-    hex_number_fontsize: float = 4.5
+    # Legacy font fields — kept for backward compat; prefer typography.*
+    hex_number_fontsize: float = 6.5
     hex_number_color: str = "#555555"
-    city_label_fontsize: float = 7.0
+    city_label_fontsize: float = 9.0
     city_label_color: str = "#222222"
-    title_fontsize: float = 24.0
+    title_fontsize: float = 26.0
 
     # Symbols
     city_marker: str = "o"
@@ -74,6 +188,16 @@ class WargameStyle:
 # Warm earth tones, muted greens, crisp thin grid lines
 # Inspired by GMT games: Normandy '44, Ukraine '43, Ardennes '44
 
+SIMONITCH_TYPO = Typography(
+    hex_number=TextStyle(fontsize=6.5, fontfamily="sans-serif", color="#6B5B45"),
+    city_label=TextStyle(fontsize=9.0, fontfamily="sans-serif", fontweight="bold", color="#222222"),
+    title=TextStyle(fontsize=13.0, fontfamily="sans-serif", fontweight="bold", color="#3A2F20"),
+    subtitle=TextStyle(fontsize=6.5, fontfamily="sans-serif", color="#5A4A35"),
+    scenario=TextStyle(fontsize=5.2, fontfamily="sans-serif", fontstyle="italic", color="#6B5B45"),
+    compass_label=TextStyle(fontsize=11.0, fontfamily="sans-serif", fontweight="bold", color="#4A3F35"),
+    coord_tick=TextStyle(fontsize=8.0, fontfamily="monospace", color="#6B5B45"),
+)
+
 SIMONITCH = WargameStyle(
     name="simonitch",
     terrain_colors={
@@ -96,11 +220,12 @@ SIMONITCH = WargameStyle(
         TerrainType.MARSH: "---",
         TerrainType.DESERT: None,
     },
+    typography=SIMONITCH_TYPO,
     grid_color="#8B7355",
     grid_linewidth=0.4,
     grid_alpha=0.7,
     water_color="#7BB3D0",
-    hex_number_fontsize=4.5,
+    hex_number_fontsize=6.5,
     hex_number_color="#6B5B45",
     river_color="#5B8FAF",
     river_linewidth=1.2,
@@ -115,6 +240,18 @@ SIMONITCH = WargameStyle(
 # --- Redmond Simonsen Style (SPI Classic) ---
 # High contrast, bold primary-adjacent colors, strong typography
 # Inspired by SPI/Avalon Hill: PanzerBlitz, Squad Leader, War in Europe
+
+SIMONSEN_TYPO = Typography(
+    hex_number=TextStyle(fontsize=7.0, fontfamily="sans-serif", fontweight="bold", color="#000000"),
+    city_label=TextStyle(fontsize=9.0, fontfamily="sans-serif", fontweight="bold", color="#000000"),
+    title=TextStyle(fontsize=14.0, fontfamily="sans-serif", fontweight="bold", color="#000000"),
+    subtitle=TextStyle(fontsize=7.0, fontfamily="sans-serif", fontweight="bold", color="#333333"),
+    scenario=TextStyle(fontsize=5.5, fontfamily="sans-serif", fontstyle="italic", color="#444444"),
+    legend_header=TextStyle(fontsize=18.0, fontfamily="sans-serif", fontweight="bold", color="#000000"),
+    legend_label=TextStyle(fontsize=16.0, fontfamily="sans-serif", fontweight="bold", color="#000000"),
+    compass_label=TextStyle(fontsize=12.0, fontfamily="sans-serif", fontweight="bold", color="#000000"),
+    coord_tick=TextStyle(fontsize=8.0, fontfamily="monospace", fontweight="bold", color="#000000"),
+)
 
 SIMONSEN = WargameStyle(
     name="simonsen",
@@ -142,8 +279,9 @@ SIMONSEN = WargameStyle(
     grid_linewidth=0.6,
     grid_alpha=0.8,
     water_color="#4169E1",
-    hex_number_fontsize=5.0,
+    hex_number_fontsize=7.0,
     hex_number_color="#000000",
+    typography=SIMONSEN_TYPO,
     city_marker_color="#B22222",
     city_label_color="#000000",
     coastline_color="#000000",
@@ -160,6 +298,18 @@ SIMONSEN = WargameStyle(
 # --- Charles Kibler Style ---
 # Painterly, saturated, strong outlines, organic feel
 # Inspired by Avalon Hill: Third Reich, Breakout: Normandy
+
+KIBLER_TYPO = Typography(
+    hex_number=TextStyle(fontsize=6.0, fontfamily="sans-serif", color="#4A3525"),
+    city_label=TextStyle(fontsize=9.0, fontfamily="sans-serif", fontweight="bold", color="#222222"),
+    title=TextStyle(fontsize=13.0, fontfamily="serif", fontweight="bold", color="#2A1A0A"),
+    subtitle=TextStyle(fontsize=6.5, fontfamily="serif", color="#4A3525"),
+    scenario=TextStyle(fontsize=5.2, fontfamily="serif", fontstyle="italic", color="#6B5B45"),
+    legend_header=TextStyle(fontsize=17.0, fontfamily="serif", fontweight="bold", color="#2A1A0A"),
+    legend_label=TextStyle(fontsize=15.0, fontfamily="serif", color="#2A1A0A"),
+    compass_label=TextStyle(fontsize=11.0, fontfamily="serif", fontweight="bold", color="#2A1A0A"),
+    coord_tick=TextStyle(fontsize=8.0, fontfamily="monospace", color="#4A3525"),
+)
 
 KIBLER = WargameStyle(
     name="kibler",
@@ -183,11 +333,12 @@ KIBLER = WargameStyle(
         TerrainType.MARSH: "---",
         TerrainType.DESERT: None,
     },
+    typography=KIBLER_TYPO,
     grid_color="#4A3525",
     grid_linewidth=0.5,
     grid_alpha=0.75,
     water_color="#3A6F9F",
-    hex_number_fontsize=4.0,
+    hex_number_fontsize=6.0,
     hex_number_color="#4A3525",
     river_color="#3A6F9F",
     river_linewidth=1.5,
@@ -207,6 +358,7 @@ def scale_style(base: WargameStyle, font_scale: float = 1.0, name: str | None = 
         name=name or base.name,
         terrain_colors=base.terrain_colors,
         terrain_hatches=base.terrain_hatches,
+        typography=base.typography.scaled(font_scale),
         grid_color=base.grid_color,
         grid_linewidth=base.grid_linewidth * font_scale,
         grid_alpha=base.grid_alpha,

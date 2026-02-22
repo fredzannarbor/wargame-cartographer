@@ -143,6 +143,95 @@ def terrain_effects():
 
 
 @main.command()
+@click.argument("analysis_file", type=click.Path(exists=True))
+@click.option("--style", type=click.Choice(["simonitch", "simonsen", "kibler"]), default=None, help="Override style")
+@click.option("--scale", type=click.Choice(["tactical", "operational", "strategic"]), default=None, help="Override scale")
+@click.option("--hex-size", type=float, default=None, help="Override hex size in km")
+@click.option("--margin", type=float, default=None, help="Override margin percent")
+@click.option("--output", type=click.Path(), default="./output", help="Output directory")
+@click.option("--generate", "run_generate", is_flag=True, help="Immediately generate the map after writing config")
+def scenario(analysis_file: str, style: str | None, scale: str | None, hex_size: float | None,
+             margin: float | None, output: str, run_generate: bool):
+    """Generate a MapSpec YAML from a ScenarioAnalysis JSON file."""
+    import json
+    import re
+
+    from wargame_cartographer.scenario.models import ScenarioAnalysis
+    from wargame_cartographer.scenario.writer import analysis_to_map_spec, write_rationale
+
+    with open(analysis_file) as f:
+        data = json.load(f)
+
+    analysis = ScenarioAnalysis(**data)
+
+    # Apply overrides
+    if style:
+        analysis.designer_style_recommendation = style
+    if margin is not None:
+        analysis.margin_percent = margin
+    if scale:
+        analysis.recommended_scale = scale
+        scale_defaults = {"tactical": 2.0, "operational": 10.0, "strategic": 50.0}
+        if hex_size is None:
+            analysis.recommended_hex_size_km = scale_defaults[scale]
+    if hex_size is not None:
+        analysis.recommended_hex_size_km = hex_size
+
+    spec = analysis_to_map_spec(analysis)
+
+    # Write outputs
+    output_dir = Path(output)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    safe_name = re.sub(r"[^a-z0-9]+", "_", analysis.scenario_name.lower()).strip("_")
+
+    spec_path = output_dir / f"{safe_name}_spec.yaml"
+    rationale_path = output_dir / f"{safe_name}_rationale.md"
+
+    spec.output_dir = output_dir
+    spec.to_yaml(str(spec_path))
+    write_rationale(analysis, rationale_path)
+
+    # Summary
+    blue_count = sum(1 for f in analysis.forces if f.side == "blue")
+    red_count = sum(1 for f in analysis.forces if f.side == "red")
+    margin_factor = 1.0 + analysis.margin_percent / 100.0
+    eff_w = analysis.area_width_km * margin_factor
+    eff_h = analysis.area_height_km * margin_factor
+
+    console.print(f"\n[bold]Scenario → MapSpec[/bold]\n")
+    console.print(f"  Scenario:  {analysis.scenario_name}")
+    console.print(f"  Theater:   {analysis.theater}")
+    console.print(f"  Scale:     {analysis.recommended_scale} ({analysis.recommended_hex_size_km} km hexes)")
+    console.print(f"  Coverage:  {eff_w:.0f} x {eff_h:.0f} km (inc. {analysis.margin_percent:.0f}% margin)")
+    console.print(f"  POIs:      {len(analysis.key_terrain)}")
+    console.print(f"  Forces:    {blue_count} {analysis.blue_side_name} / {red_count} {analysis.red_side_name}")
+    console.print(f"  Style:     {analysis.designer_style_recommendation}")
+    console.print(f"\n  Spec:      {spec_path.resolve()}")
+    console.print(f"  Rationale: {rationale_path.resolve()}\n")
+
+    if run_generate:
+        from wargame_cartographer.pipeline import run_pipeline
+
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+        ) as progress:
+            task = progress.add_task("Generating map...", total=None)
+
+            def status_callback(msg: str):
+                progress.update(task, description=msg)
+
+            results = run_pipeline(spec_path, status_callback=status_callback)
+
+        console.print(f"[bold green]Map generated![/bold green]")
+        console.print(f"  Hex count: {results['hex_count']}")
+        for fmt, path in results.get("output_files", {}).items():
+            console.print(f"  {fmt:5s}: {path}")
+        console.print()
+
+
+@main.command()
 @click.argument("spec_file", type=click.Path(exists=True))
 def validate(spec_file: str):
     """Validate a map spec YAML file."""

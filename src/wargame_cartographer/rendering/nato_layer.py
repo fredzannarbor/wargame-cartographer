@@ -89,12 +89,15 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
     counter_w = hex_flat_to_flat * context.spec.counter_hex_ratio
     counter_h = counter_w  # Square counters (wargame standard)
 
-    # Font sizes scale with counter size
+    # Font sizes scale with counter size via typography base sizes
+    typo = context.style.typography
+    ratio_scale = context.spec.counter_hex_ratio / 0.65
     fs = context.spec.font_scale
-    symbol_fontsize = max(6.0, 9.0 * fs * (context.spec.counter_hex_ratio / 0.65))
-    size_fontsize = max(5.0, 5.5 * fs * (context.spec.counter_hex_ratio / 0.65))
-    desig_fontsize = max(5.0, 5.5 * fs * (context.spec.counter_hex_ratio / 0.65))
-    factor_fontsize = max(5.0, 6.0 * fs * (context.spec.counter_hex_ratio / 0.65))
+    symbol_fontsize = max(6.0, typo.counter_symbol.fontsize * fs * ratio_scale)
+    size_fontsize = max(5.0, typo.counter_size_indicator.fontsize * fs * ratio_scale)
+    desig_fontsize = max(5.0, typo.counter_designation.fontsize * fs * ratio_scale)
+    factor_fontsize = max(5.0, typo.counter_factor.fontsize * fs * ratio_scale)
+    sep_fontsize = max(4.0, typo.counter_separator.fontsize * fs * ratio_scale)
 
     # Track stacking: offset multiple units in same hex
     hex_stack_index: dict[str, int] = {}
@@ -177,10 +180,10 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
             cx, cy + counter_h * 0.05,
             symbol,
             fontsize=symbol_fontsize,
-            color="black",
+            color=typo.counter_symbol.color,
             ha="center", va="center",
-            fontfamily="sans-serif",
-            fontweight="bold",
+            fontfamily=typo.counter_symbol.fontfamily,
+            fontweight=typo.counter_symbol.fontweight,
             zorder=9,
         )
 
@@ -191,10 +194,10 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
                 cx, cy + counter_h / 2 + r * 0.06,
                 size_text,
                 fontsize=size_fontsize,
-                color="black",
+                color=typo.counter_size_indicator.color,
                 ha="center", va="bottom",
-                fontfamily="sans-serif",
-                fontweight="bold",
+                fontfamily=typo.counter_size_indicator.fontfamily,
+                fontweight=typo.counter_size_indicator.fontweight,
                 zorder=9,
                 bbox=dict(facecolor="white", alpha=0.8, edgecolor="none", pad=0.3),
             )
@@ -204,10 +207,10 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
             cx, cy - counter_h / 2 - r * 0.06,
             unit.designation,
             fontsize=desig_fontsize,
-            color="black",
+            color=typo.counter_designation.color,
             ha="center", va="top",
-            fontfamily="sans-serif",
-            fontweight="bold",
+            fontfamily=typo.counter_designation.fontfamily,
+            fontweight=typo.counter_designation.fontweight,
             zorder=9,
             bbox=dict(facecolor="white", alpha=0.8, edgecolor="none", pad=0.3),
         )
@@ -222,8 +225,8 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
                 fontsize=factor_fontsize,
                 color=text_color,
                 ha="center", va="center",
-                fontfamily="sans-serif",
-                fontweight="bold",
+                fontfamily=typo.counter_factor.fontfamily,
+                fontweight=typo.counter_factor.fontweight,
                 zorder=9,
             )
             # Separator dash
@@ -231,10 +234,10 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
                 cx,
                 cy - counter_h * 0.32,
                 "-",
-                fontsize=factor_fontsize * 0.8,
+                fontsize=sep_fontsize,
                 color=text_color,
                 ha="center", va="center",
-                fontfamily="sans-serif",
+                fontfamily=typo.counter_separator.fontfamily,
                 zorder=9,
             )
             # Right: movement factor
@@ -245,8 +248,8 @@ def render_nato_layer(ax: plt.Axes, context: RenderContext):
                 fontsize=factor_fontsize,
                 color=text_color,
                 ha="center", va="center",
-                fontfamily="sans-serif",
-                fontweight="bold",
+                fontfamily=typo.counter_factor.fontfamily,
+                fontweight=typo.counter_factor.fontweight,
                 zorder=9,
             )
 

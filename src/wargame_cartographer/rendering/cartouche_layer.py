@@ -32,23 +32,18 @@ def render_cartouche_layer(
     if spec.title:
         _draw_title_block(ax, context, x_min, y_max, width, height)
 
-    # Scale bar (bottom-left)
-    if spec.show_scale_bar:
-        _draw_scale_bar(ax, context, x_min, y_min, width, height)
+    # Scale bar and hex metrics are now inside the title block
 
-    # Legend (bottom-right)
+    # Terrain legend (bottom-right)
     if spec.show_legend:
-        _draw_legend(ax, context, x_max, y_min, width, height)
+        _draw_legend(ax, context, x_min, x_max, y_min, y_max)
 
     # Compass rose (top-right)
     if spec.show_compass:
-        _draw_compass_rose(ax, x_max - width * 0.06, y_max - height * 0.06, height * 0.04)
+        _draw_compass_rose(ax, x_max - width * 0.06, y_max - height * 0.06, height * 0.04, style.typography)
 
     # Coordinate ticks along border
     _draw_coord_ticks(ax, context, x_min, x_max, y_min, y_max)
-
-    # Hex metrics info (bottom-left, below scale bar)
-    _draw_hex_metrics(ax, context, x_min, y_min, width, height)
 
     # Map border
     border_rect = Rectangle(
@@ -62,29 +57,36 @@ def render_cartouche_layer(
 
 
 def _draw_title_block(ax, context, x_min, y_max, width, height):
-    """Draw title, subtitle, and scenario in a properly sized background box."""
+    """Draw title, subtitle, scenario, and scale info in one block."""
     style = context.style
     spec = context.spec
+    typo = style.typography
 
-    title_fs = style.title_fontsize * 0.5
-    subtitle_fs = title_fs * 0.5
-    scenario_fs = title_fs * 0.4
+    ts_title = typo.title
+    ts_subtitle = typo.subtitle
+    ts_scenario = typo.scenario
+    ts_scale_label = typo.scale_label
+    ts_scale_text = typo.scale_text
 
     line_gap = height * 0.015
     title_h = height * 0.025
     subtitle_h = height * 0.015
     scenario_h = height * 0.012
+    scale_section_h = height * 0.045
     padding = height * 0.015
 
+    # Compute total box height
     box_h = padding
     box_h += title_h
     if spec.subtitle:
         box_h += line_gap + subtitle_h
     if spec.scenario:
         box_h += line_gap + scenario_h
+    if spec.show_scale_bar:
+        box_h += line_gap + scale_section_h
     box_h += padding
 
-    box_w = width * 0.30
+    box_w = width * 0.32
     box_x = x_min + width * 0.02
     box_y = y_max - height * 0.02 - box_h
 
@@ -105,10 +107,7 @@ def _draw_title_block(ax, context, x_min, y_max, width, height):
     ax.text(
         text_x, cursor_y,
         spec.title.upper(),
-        fontsize=title_fs,
-        fontfamily="sans-serif",
-        fontweight="bold",
-        color="#222222",
+        **ts_title.mpl_kwargs(),
         va="top",
         ha="left",
         zorder=10,
@@ -120,9 +119,7 @@ def _draw_title_block(ax, context, x_min, y_max, width, height):
         ax.text(
             text_x, cursor_y,
             spec.subtitle,
-            fontsize=subtitle_fs,
-            fontfamily="sans-serif",
-            color="#444444",
+            **ts_subtitle.mpl_kwargs(),
             va="top",
             ha="left",
             zorder=10,
@@ -134,14 +131,167 @@ def _draw_title_block(ax, context, x_min, y_max, width, height):
         ax.text(
             text_x, cursor_y,
             spec.scenario,
-            fontsize=scenario_fs,
-            fontfamily="sans-serif",
-            fontstyle="italic",
-            color="#666666",
+            **ts_scenario.mpl_kwargs(),
             va="top",
             ha="left",
             zorder=10,
         )
+        cursor_y -= scenario_h
+
+    # Scale info section inside title block
+    if spec.show_scale_bar:
+        cursor_y -= line_gap
+        # Separator line
+        ax.plot(
+            [box_x + box_w * 0.03, box_x + box_w * 0.97],
+            [cursor_y, cursor_y],
+            color="#AAAAAA", linewidth=0.5, zorder=10,
+        )
+        cursor_y -= height * 0.005
+
+        # Scale bar (alternating black/white segments)
+        hex_km = spec.hex_size_km
+        candidates = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]
+        target_km = hex_km * 3
+        scale_km = min(candidates, key=lambda c: abs(c - target_km))
+        scale_m = scale_km * 1000.0
+        bar_w_data = min(scale_m, box_w * 0.85)
+        n_segments = 4
+        seg_len = bar_w_data / n_segments
+        bar_x = text_x
+        bar_y = cursor_y - height * 0.006
+        bar_h = height * 0.004
+
+        for i in range(n_segments):
+            color = "black" if i % 2 == 0 else "white"
+            rect = Rectangle(
+                (bar_x + i * seg_len, bar_y),
+                seg_len, bar_h,
+                facecolor=color,
+                edgecolor="black",
+                linewidth=0.4,
+                zorder=10,
+            )
+            ax.add_patch(rect)
+
+        ax.text(bar_x, bar_y - bar_h * 0.3, "0",
+                **ts_scale_label.mpl_kwargs(fontsize=ts_scale_label.fontsize * 0.8),
+                ha="center", va="top", zorder=10)
+        ax.text(bar_x + bar_w_data, bar_y - bar_h * 0.3, f"{scale_km} km",
+                **ts_scale_label.mpl_kwargs(fontsize=ts_scale_label.fontsize * 0.8),
+                ha="center", va="top", zorder=10)
+
+        cursor_y = bar_y - bar_h * 2.5
+
+        # Scale text info
+        grid = context.grid
+        hex_radius_m = grid.hex_radius_m
+        hex_radius_km = hex_radius_m / 1000.0
+        flat_to_flat_km = hex_radius_km * math.sqrt(3)
+
+        output_width_m = spec.output_width_mm / 1000.0
+        scale_ratio = int(width / output_width_m)
+        if scale_ratio > 1000:
+            scale_ratio = round(scale_ratio / 1000) * 1000
+
+        scale_info = (
+            f"1 hex = {hex_km:.0f} km  |  "
+            f"Scale approx 1:{scale_ratio:,}  |  "
+            f"{grid.hex_count} hexes"
+        )
+        ax.text(
+            text_x, cursor_y, scale_info,
+            **ts_scale_text.mpl_kwargs(),
+            va="top", ha="left",
+            zorder=10,
+        )
+
+
+def _draw_legend(ax, context, x_min, x_max, y_min, y_max):
+    """Draw terrain effects legend at bottom-right of map."""
+    style = context.style
+    spec = context.spec
+    width = x_max - x_min
+    height = y_max - y_min
+
+    terrains_present = set()
+    for info in context.hex_terrain.values():
+        terrains_present.add(info.get("terrain", TerrainType.CLEAR))
+
+    if not terrains_present:
+        return
+
+    row_h = height * 0.018
+    header_h = height * 0.022
+    padding = height * 0.015
+
+    box_h = padding + header_h + len(terrains_present) * row_h + padding
+    box_w = width * 0.22
+    box_x = x_max - width * 0.02 - box_w
+    box_y = y_min + height * 0.02
+
+    bg = FancyBboxPatch(
+        (box_x, box_y), box_w, box_h,
+        boxstyle="round,pad=0.005",
+        facecolor="white",
+        edgecolor="#666666",
+        linewidth=0.8,
+        alpha=0.9,
+        zorder=9.5,
+    )
+    ax.add_patch(bg)
+
+    text_x = box_x + box_w * 0.05
+    cursor_y = box_y + box_h - padding
+
+    typo = style.typography
+    ts_header = typo.legend_header
+    ts_label = typo.legend_label
+
+    ax.text(
+        text_x, cursor_y,
+        "TERRAIN EFFECTS",
+        **ts_header.mpl_kwargs(),
+        ha="left", va="top", zorder=10,
+    )
+    cursor_y -= header_h
+
+    swatch_w = box_w * 0.08
+    swatch_h = row_h * 0.6
+
+    for terrain in sorted(terrains_present, key=lambda t: t.value):
+        effects = TERRAIN_EFFECTS.get(terrain)
+        if effects is None:
+            continue
+
+        swatch_x = text_x
+        swatch_y = cursor_y - swatch_h * 0.8
+        color = style.terrain_colors.get(terrain, "#CCCCCC")
+
+        swatch = Rectangle(
+            (swatch_x, swatch_y), swatch_w, swatch_h,
+            facecolor=color, edgecolor="#333333",
+            linewidth=0.3, zorder=10,
+        )
+        ax.add_patch(swatch)
+
+        hatch = style.terrain_hatches.get(terrain)
+        if hatch:
+            hatch_swatch = Rectangle(
+                (swatch_x, swatch_y), swatch_w, swatch_h,
+                facecolor="none", edgecolor=style.grid_color,
+                hatch=hatch, linewidth=0, alpha=0.4, zorder=10.1,
+            )
+            ax.add_patch(hatch_swatch)
+
+        label = f"{terrain.value.capitalize()}  MP:{effects.movement_cost}  Def:{effects.defensive_modifier:+d}"
+        ax.text(
+            text_x + swatch_w * 1.3, cursor_y - swatch_h * 0.1,
+            label,
+            **ts_label.mpl_kwargs(),
+            va="top", ha="left", zorder=10,
+        )
+        cursor_y -= row_h
 
 
 def _draw_scale_bar(ax, context, x_min, y_min, width, height):
@@ -176,18 +326,18 @@ def _draw_scale_bar(ax, context, x_min, y_min, width, height):
     ax.text(
         bar_x, bar_y - bar_h * 0.5,
         "0",
-        fontsize=10, ha="center", va="top", zorder=10,
+        fontsize=12, ha="center", va="top", zorder=10,
     )
     ax.text(
         bar_x + scale_m, bar_y - bar_h * 0.5,
         f"{scale_km} km",
-        fontsize=10, ha="center", va="top", zorder=10,
+        fontsize=12, ha="center", va="top", zorder=10,
     )
 
     ax.text(
         bar_x, bar_y + bar_h * 2,
         f"1 hex = {hex_km:.0f} km",
-        fontsize=9, ha="left", va="bottom", color="#444444", zorder=10,
+        fontsize=11, ha="left", va="bottom", color="#444444", zorder=10,
     )
 
     output_width_m = spec.output_width_mm / 1000.0
@@ -197,7 +347,7 @@ def _draw_scale_bar(ax, context, x_min, y_min, width, height):
     ax.text(
         bar_x, bar_y - bar_h * 3,
         f"Scale approx 1:{scale_ratio:,}",
-        fontsize=9, ha="left", va="top", color="#666666", zorder=10,
+        fontsize=11, ha="left", va="top", color="#666666", zorder=10,
     )
 
 
@@ -232,7 +382,7 @@ def _draw_hex_metrics(ax, context, x_min, y_min, width, height):
         x_min + width * 0.03,
         y_min + height * 0.012,
         metrics_text,
-        fontsize=8.0,
+        fontsize=10.0,
         fontfamily="monospace",
         color="#666666",
         va="bottom",
@@ -241,90 +391,7 @@ def _draw_hex_metrics(ax, context, x_min, y_min, width, height):
     )
 
 
-def _draw_legend(ax, context, x_max, y_min, width, height):
-    """Draw terrain effects legend with hatching preview."""
-    style = context.style
-
-    terrains_present = set()
-    for info in context.hex_terrain.values():
-        terrains_present.add(info.get("terrain", TerrainType.CLEAR))
-
-    if not terrains_present:
-        return
-
-    legend_w = width * 0.32
-    row_h = height * 0.045
-    legend_h = row_h * (len(terrains_present) + 1.5)
-    lx = x_max - width * 0.02 - legend_w
-    ly = y_min + height * 0.04
-
-    bg = FancyBboxPatch(
-        (lx, ly), legend_w, legend_h,
-        boxstyle="round,pad=0.005",
-        facecolor=style.legend_bg_color,
-        edgecolor="#666666",
-        linewidth=0.5,
-        zorder=9,
-    )
-    ax.add_patch(bg)
-
-    # Header
-    ax.text(
-        lx + legend_w * 0.5, ly + legend_h - row_h * 0.3,
-        "TERRAIN EFFECTS",
-        fontsize=15.0, fontweight="bold", ha="center", va="top",
-        fontfamily="sans-serif", zorder=10,
-    )
-
-    for i, terrain in enumerate(sorted(terrains_present, key=lambda t: t.value)):
-        effects = TERRAIN_EFFECTS.get(terrain)
-        if effects is None:
-            continue
-
-        y_pos = ly + legend_h - row_h * 1.3 - i * row_h
-        color = style.terrain_colors.get(terrain, "#CCCCCC")
-
-        swatch_x = lx + legend_w * 0.04
-        swatch_y = y_pos - row_h * 0.3
-        swatch_w = legend_w * 0.08
-        swatch_h = row_h * 0.6
-
-        # Color swatch
-        swatch = Rectangle(
-            (swatch_x, swatch_y),
-            swatch_w, swatch_h,
-            facecolor=color,
-            edgecolor="#333333",
-            linewidth=0.3,
-            zorder=10,
-        )
-        ax.add_patch(swatch)
-
-        # Hatching preview on swatch
-        hatch = style.terrain_hatches.get(terrain)
-        if hatch:
-            hatch_swatch = Rectangle(
-                (swatch_x, swatch_y),
-                swatch_w, swatch_h,
-                facecolor="none",
-                edgecolor=style.grid_color,
-                hatch=hatch,
-                linewidth=0,
-                alpha=0.4,
-                zorder=10.1,
-            )
-            ax.add_patch(hatch_swatch)
-
-        label = f"{terrain.value.capitalize()}  MP:{effects.movement_cost}  Def:{effects.defensive_modifier:+d}"
-        ax.text(
-            lx + legend_w * 0.16, y_pos,
-            label,
-            fontsize=13.0, va="center", ha="left",
-            fontfamily="sans-serif", zorder=10,
-        )
-
-
-def _draw_compass_rose(ax, cx, cy, size):
+def _draw_compass_rose(ax, cx, cy, size, typography=None):
     """Draw a 4-point star compass rose."""
     # Main N-S-E-W points
     point_len = size * 1.0
@@ -379,12 +446,15 @@ def _draw_compass_rose(ax, cx, cy, size):
     )
 
     # "N" label
+    ts_compass = typography.compass_label if typography else None
     ax.text(
         cx, cy + point_len + size * 0.15,
         "N",
-        fontsize=9, fontweight="bold",
+        fontsize=ts_compass.fontsize if ts_compass else 11,
+        fontfamily=ts_compass.fontfamily if ts_compass else "sans-serif",
+        fontweight=ts_compass.fontweight if ts_compass else "bold",
         ha="center", va="bottom",
-        color="#333333",
+        color=ts_compass.color if ts_compass else "#333333",
         zorder=10.6,
     )
 
@@ -414,9 +484,11 @@ def _draw_coord_ticks(ax, context, x_min, x_max, y_min, y_max):
     else:
         interval = 0.1
 
+    ts_coord = context.style.typography.coord_tick
     tick_len = min(width, height) * 0.008
-    tick_kw = dict(color="#444444", linewidth=0.5, zorder=10.5)
-    text_kw = dict(fontsize=6, color="#444444", fontfamily="monospace", zorder=10.5)
+    tick_kw = dict(color=ts_coord.color, linewidth=0.5, zorder=10.5)
+    text_kw = dict(fontsize=ts_coord.fontsize, color=ts_coord.color,
+                   fontfamily=ts_coord.fontfamily, zorder=10.5)
 
     transformer = grid._to_proj
 

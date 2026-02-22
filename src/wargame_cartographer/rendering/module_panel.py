@@ -25,52 +25,51 @@ def render_module_panels(ax: plt.Axes, context: RenderContext):
 
     n_panels = len(context.spec.module_panels)
     panel_width = 0.92 / n_panels
+    typo = context.style.typography
 
     for idx, panel in enumerate(context.spec.module_panels):
         panel_x = 0.04 + idx * panel_width
 
         if panel.panel_type == "crt":
-            _render_crt(ax, context, panel_x, panel_width * 0.95, panel.title)
+            _render_crt(ax, context, panel_x, panel_width * 0.95, panel.title, typo)
         elif panel.panel_type == "tec":
-            _render_tec(ax, context, panel_x, panel_width * 0.95, panel.title)
+            _render_tec(ax, context, panel_x, panel_width * 0.95, panel.title, typo)
         elif panel.panel_type == "sequence_of_play":
-            _render_sequence(ax, context, panel_x, panel_width * 0.95, panel.title)
+            _render_sequence(ax, context, panel_x, panel_width * 0.95, panel.title, typo)
         elif panel.panel_type == "custom" and panel.custom_data:
             _render_custom(ax, context, panel_x, panel_width * 0.95,
-                          panel.title, panel.custom_data)
+                          panel.title, panel.custom_data, typo)
 
 
-def _render_crt(ax, context, x_start, width, title):
+def _render_crt(ax, context, x_start, width, title, typo):
     """Render a Combat Results Table."""
     title = title or "COMBAT RESULTS TABLE"
-    ax.text(x_start + width / 2, 0.92, title,
-            fontsize=10, fontweight="bold", ha="center", va="top",
-            fontfamily="sans-serif", zorder=1)
+    ts_title = typo.panel_title
+    ts_header = typo.panel_header
+    ts_cell = typo.panel_cell
+    ts_detail = typo.panel_detail
 
-    # Column headers: odds ratios
+    ax.text(x_start + width / 2, 0.92, title,
+            **ts_title.mpl_kwargs(), ha="center", va="top", zorder=1)
+
     odds = ["1:3", "1:2", "1:1", "2:1", "3:1", "4:1", "5:1", "6:1"]
-    col_w = width / (len(odds) + 1)  # +1 for die roll column
+    col_w = width / (len(odds) + 1)
     row_h = 0.06
 
-    # Header row
     header_y = 0.85
     ax.text(x_start + col_w * 0.5, header_y, "Die",
-            fontsize=7, fontweight="bold", ha="center", va="center",
-            fontfamily="sans-serif", zorder=1)
+            **ts_header.mpl_kwargs(), ha="center", va="center", zorder=1)
 
     for i, odd in enumerate(odds):
         cx = x_start + (i + 1.5) * col_w
-        # Header cell
         rect = Rectangle((cx - col_w / 2, header_y - row_h / 2), col_w, row_h,
                           facecolor="#DDDDDD", edgecolor="#999999",
                           linewidth=0.3, zorder=0.5)
         ax.add_patch(rect)
         ax.text(cx, header_y, odd,
-                fontsize=6, fontweight="bold", ha="center", va="center",
-                fontfamily="sans-serif", zorder=1)
+                **ts_cell.mpl_kwargs(), fontweight="bold",
+                ha="center", va="center", zorder=1)
 
-    # Default CRT results
-    # rows: die 1-6; results per odds column
     results = [
         ["AE", "AE", "AR", "DR", "DR", "DE", "DE", "DE"],
         ["AE", "AR", "AR", "DR", "DR", "DE", "DE", "DE"],
@@ -81,24 +80,21 @@ def _render_crt(ax, context, x_start, width, title):
     ]
 
     result_colors = {
-        "AE": "#FFCCCC",  # Attacker eliminated
-        "AR": "#FFE0CC",  # Attacker retreats
-        "EX": "#FFFFCC",  # Exchange
-        "DR": "#CCFFCC",  # Defender retreats
-        "DE": "#CCCCFF",  # Defender eliminated
-        "NE": "#EEEEEE",  # No effect
+        "AE": "#FFCCCC",
+        "AR": "#FFE0CC",
+        "EX": "#FFFFCC",
+        "DR": "#CCFFCC",
+        "DE": "#CCCCFF",
+        "NE": "#EEEEEE",
     }
 
     for row_idx, row_results in enumerate(results):
         y = header_y - (row_idx + 1) * row_h
         die_val = row_idx + 1
 
-        # Die column
         ax.text(x_start + col_w * 0.5, y, str(die_val),
-                fontsize=7, fontweight="bold", ha="center", va="center",
-                fontfamily="sans-serif", zorder=1)
+                **ts_header.mpl_kwargs(), ha="center", va="center", zorder=1)
 
-        # Result cells
         for col_idx, result in enumerate(row_results):
             cx = x_start + (col_idx + 1.5) * col_w
             bg_color = result_colors.get(result, "#FFFFFF")
@@ -108,10 +104,8 @@ def _render_crt(ax, context, x_start, width, title):
                               linewidth=0.3, alpha=alt_alpha, zorder=0.5)
             ax.add_patch(rect)
             ax.text(cx, y, result,
-                    fontsize=6, ha="center", va="center",
-                    fontfamily="sans-serif", zorder=1)
+                    **ts_cell.mpl_kwargs(), ha="center", va="center", zorder=1)
 
-    # Legend for results
     legend_y = header_y - (len(results) + 1.5) * row_h
     legend_items = [
         ("AE", "Attacker Eliminated"),
@@ -130,23 +124,24 @@ def _render_crt(ax, context, x_start, width, title):
                             linewidth=0.3, zorder=0.5)
         ax.add_patch(swatch)
         ax.text(lx + width * 0.04, ly, f"{code} = {desc}",
-                fontsize=5, ha="left", va="center",
-                fontfamily="sans-serif", zorder=1)
+                **ts_detail.mpl_kwargs(), ha="left", va="center", zorder=1)
 
 
-def _render_tec(ax, context, x_start, width, title):
+def _render_tec(ax, context, x_start, width, title, typo):
     """Render a Terrain Effects Chart from TERRAIN_EFFECTS."""
     title = title or "TERRAIN EFFECTS CHART"
+    ts_title = typo.panel_title
+    ts_header = typo.panel_header
+    ts_cell = typo.panel_cell
+
     ax.text(x_start + width / 2, 0.92, title,
-            fontsize=10, fontweight="bold", ha="center", va="top",
-            fontfamily="sans-serif", zorder=1)
+            **ts_title.mpl_kwargs(), ha="center", va="top", zorder=1)
 
     style = context.style
     col_headers = ["Terrain", "MP Cost", "Defense", "LOS Block"]
     col_widths = [0.30, 0.20, 0.20, 0.30]
     row_h = 0.055
 
-    # Headers
     header_y = 0.85
     cx = x_start
     for header, cw in zip(col_headers, col_widths):
@@ -156,11 +151,9 @@ def _render_tec(ax, context, x_start, width, title):
                           linewidth=0.3, zorder=0.5)
         ax.add_patch(rect)
         ax.text(cx + cell_w / 2, header_y, header,
-                fontsize=7, fontweight="bold", ha="center", va="center",
-                fontfamily="sans-serif", zorder=1)
+                **ts_header.mpl_kwargs(), ha="center", va="center", zorder=1)
         cx += cell_w
 
-    # Terrain rows
     terrains = sorted(TERRAIN_EFFECTS.keys(), key=lambda t: t.value)
     for row_idx, terrain in enumerate(terrains):
         effects = TERRAIN_EFFECTS[terrain]
@@ -183,17 +176,20 @@ def _render_tec(ax, context, x_start, width, title):
                               linewidth=0.3, zorder=0.5)
             ax.add_patch(rect)
             ax.text(cx + cell_w / 2, y, val,
-                    fontsize=6, ha="center", va="center",
-                    fontfamily="sans-serif", zorder=1)
+                    **ts_cell.mpl_kwargs(), ha="center", va="center", zorder=1)
             cx += cell_w
 
 
-def _render_sequence(ax, context, x_start, width, title):
+def _render_sequence(ax, context, x_start, width, title, typo):
     """Render a Sequence of Play panel."""
     title = title or "SEQUENCE OF PLAY"
+    ts_title = typo.panel_title
+    ts_num = typo.panel_phase_number
+    ts_name = typo.panel_phase_name
+    ts_desc = typo.panel_phase_desc
+
     ax.text(x_start + width / 2, 0.92, title,
-            fontsize=10, fontweight="bold", ha="center", va="top",
-            fontfamily="sans-serif", zorder=1)
+            **ts_title.mpl_kwargs(), ha="center", va="top", zorder=1)
 
     phases = [
         ("1.", "Initial Phase", "Check supply, weather, reinforcements"),
@@ -208,22 +204,21 @@ def _render_sequence(ax, context, x_start, width, title):
         y = 0.82 - i * row_h * 1.5
 
         ax.text(x_start + 0.02, y, num,
-                fontsize=9, fontweight="bold", color="#333333",
-                ha="left", va="top", fontfamily="sans-serif", zorder=1)
+                **ts_num.mpl_kwargs(), ha="left", va="top", zorder=1)
         ax.text(x_start + 0.06, y, phase,
-                fontsize=8, fontweight="bold", color="#333333",
-                ha="left", va="top", fontfamily="sans-serif", zorder=1)
+                **ts_name.mpl_kwargs(), ha="left", va="top", zorder=1)
         ax.text(x_start + 0.06, y - row_h * 0.5, desc,
-                fontsize=6, color="#666666",
-                ha="left", va="top", fontfamily="sans-serif", zorder=1)
+                **ts_desc.mpl_kwargs(), ha="left", va="top", zorder=1)
 
 
-def _render_custom(ax, context, x_start, width, title, data):
+def _render_custom(ax, context, x_start, width, title, data, typo):
     """Render a custom data panel from YAML-provided content."""
     title = title or "REFERENCE"
+    ts_title = typo.panel_title
+    ts_cell = typo.panel_header
+
     ax.text(x_start + width / 2, 0.92, title,
-            fontsize=10, fontweight="bold", ha="center", va="top",
-            fontfamily="sans-serif", zorder=1)
+            **ts_title.mpl_kwargs(), ha="center", va="top", zorder=1)
 
     rows = data.get("rows", [])
     row_h = 0.04
@@ -232,12 +227,11 @@ def _render_custom(ax, context, x_start, width, title, data):
         y = 0.85 - i * row_h
         if isinstance(row_data, str):
             ax.text(x_start + 0.02, y, row_data,
-                    fontsize=7, color="#333333",
-                    ha="left", va="top", fontfamily="sans-serif", zorder=1)
+                    **ts_cell.mpl_kwargs(fontweight="normal"),
+                    ha="left", va="top", zorder=1)
         elif isinstance(row_data, dict):
             text = row_data.get("text", "")
             bold = row_data.get("bold", False)
             ax.text(x_start + 0.02, y, text,
-                    fontsize=7, color="#333333",
-                    fontweight="bold" if bold else "normal",
-                    ha="left", va="top", fontfamily="sans-serif", zorder=1)
+                    **ts_cell.mpl_kwargs(fontweight="bold" if bold else "normal"),
+                    ha="left", va="top", zorder=1)
