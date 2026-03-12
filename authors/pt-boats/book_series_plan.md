@@ -13,32 +13,39 @@ Each entry below includes: title, subtitle, scope, why it fills a gap, estimated
 
 **Subtitle:** *American Motor Torpedo Boats from North Africa to Southern France, 1942–1945*
 
-**Scope:** The complete history of PT boat operations in the Mediterranean theater, from the first Squadron 15 boats arriving in North Africa for Operation Torch through the final actions off Southern France in 1944. Covers operations along the North African coast, the Sicilian campaign, the Italian campaign (including Anzio and the Adriatic), Corsica-based operations against Axis coastal shipping, and Operation Dragoon.
+**Scope:** The complete history of 42 American PT boats across three squadrons fighting a two-and-a-half-year war in the Mediterranean, from MTBRon 15's first patrol out of Bone, Algeria (April 28, 1943) to the final offensive naval patrol of the Mediterranean war (April 28–29, 1945). Covers the North African coast campaign, the Sicilian and Italian invasions, the Anzio beachhead, Corsica-based interdiction of Axis coastal shipping, the invasion of Elba, and Operation Dragoon (Southern France). A theater where American PTs operated under British Coastal Forces command in joint patrols—a unique inter-Allied arrangement found nowhere else in the PT boat war.
 
-**Why it fills a gap:** No single volume has ever covered the full Mediterranean PT story from start to finish. Bulkley's *At Close Quarters* dedicates chapters but is spread across the entire war. The Mediterranean squadrons fought a very different war than their Pacific counterparts—shorter ranges, European coastal geography, Axis E-boats and F-lighters as primary adversaries rather than destroyers and barges—and this story deserves its own dedicated treatment.
+**Why it fills a gap:** No single volume has ever covered the full Mediterranean PT story from start to finish. Bulkley's *At Close Quarters* (Part VI) dedicates chapters but is spread across a 500+ page comprehensive history. The Mediterranean PTs fought a fundamentally different war than their Pacific counterparts: primarily Higgins 78-ft boats (not Elco 80-ft), closely integrated with British MTBs and MGBs, engaging German F-lighters (170-ft, 120-ton cargo vessels with 88mm guns) and E-boats rather than Japanese barges. By war's end, Mediterranean PT units fired 354 torpedoes, claimed 38 vessels sunk (23,700 tons), lost four boats, and suffered five officers and 19 men killed. This compact, intense campaign has never received standalone treatment.
 
-**Key Squadrons:** RON 15, RON 29, RON 22, RON 28, RON 31
+**Key Squadrons:**
+- **MTBRon 15** (PT-201 through PT-218) — Pioneer squadron, arrived January 1943 under Lt. Comdr. Stanley M. Barnes. Primarily Higgins 78-ft boats. First American PT squadron in the European theater.
+- **MTBRon 22** (including PT-305 "Sudden Jerk" and PT-309 "Oh Frankie!") — Arrived May 1944. Based on Corsica, later St. Tropez. 77 offensive patrols.
+- **MTBRon 29** — Arrived May 1944, Elco boats. Joined Squadrons 15 and 22 for the final push up the Italian coast.
 
 **Key Operations:**
-- Operation Torch (November 1942) — first PT boats in the MTO
-- Tunisia coastal operations (1943)
-- Operation Husky — Sicily (July 1943)
-- Salerno and Italian west coast operations (September 1943+)
-- Anzio beachhead defense (January–May 1944)
-- Bastia, Corsica — the forward operating base for Ligurian Sea operations
-- Adriatic operations from Vis Island and Italian east coast bases
-- Operation Dragoon — Southern France (August 1944)
+- Bone, Algeria patrols (April 1943) — Barnes personally took PT-206 to Cape Bon and torpedoed a German tanker
+- Operation Husky — Sicily (July 1943) — dispatch boats, escorts, nightly patrols
+- Salerno (September 1943) — smoke screens, anti-shore battery fire, shot down German planes
+- Anzio beachhead defense (January–May 1944) — the "dummy landing" deception using loudspeakers and fireworks
+- Joint British-American patrols (November 1943–April 1944) — 14 engagements, 15 lighters sunk, two E-boats, a tug, an oil barge
+- Invasion of Elba (June 18, 1944) — PT-305 sank a German Flak lighter
+- Bastia and Calvi, Corsica — forward operating bases for Ligurian Sea interdiction (35 miles from the Italian mainland)
+- Operation Dragoon — Southern France (August 1944) — RON 22 landed French Commandos, diversionary force in Gulf Juan, anti-E-boat screen
+- Final coastal campaign up to Leghorn (Livorno) and the Franco-Italian border
+
+**Base progression:** Bone (Algeria) → Bizerte (Tunisia) → Palermo (Sicily) → Salerno (Italy) → Maddalena (Sardinia) → Bastia/Calvi (Corsica) → St. Tropez/Golfe-Juan (France)
 
 **Estimated length:** 90,000 words + 50 photographs + 6 maps
 
 **Primary sources:**
-- Action reports, RON 15/22/28/29/31 war diaries (NARA RG 38)
+- Action reports, RON 15/22/29 war diaries (NARA RG 38)
 - COMNAVNAW (Commander Naval Forces Northwest African Waters) operational records
 - British Coastal Forces Mediterranean records (UK National Archives, ADM series)
 - Oral histories from PT Boats Inc. archive
-- Italian and German naval records for the adversary perspective
+- Italian and German naval records for the adversary perspective (German records confirm loss of six small ships of destroyer types, 600–900 tons, to U.S. PT attacks)
+- *At Close Quarters* Part VI as baseline (available via HyperWar)
 
-**Photo strategy:** NARA 80-G series (Mediterranean subsection), NHHC NH series, British Imperial War Museum for combined operations photos, Italian Navy historical archive for Axis perspective shots.
+**Photo strategy:** NARA 80-G series (Mediterranean subsection), NHHC NH series, **National WWII Museum Joe Cirlot collection** (PT-305/RON 22 crew photos from Corsica and Leghorn), British Imperial War Museum for combined operations photos, Italian Navy historical archive (Ufficio Storico della Marina Militare) for Axis perspective shots.
 
 ---
 
@@ -68,9 +75,9 @@ Each entry below includes: title, subtitle, scope, why it fills a gap, estimated
 
 **Subtitle:** *The Motor Torpedo Boat Squadrons Training Center, 1942–1945*
 
-**Scope:** The untold story of how the Navy trained thousands of PT boat officers and enlisted men at the Motor Torpedo Boat Squadrons Training Center (MTBSTC) in Melville, Rhode Island. Covers the establishment of the base, the training curriculum, the transition from peacetime yachtsmen-volunteers to wartime draftees, the role of combat veterans as instructors, and the human experience of preparing for one of the Navy's most dangerous assignments.
+**Scope:** The untold story of how the Navy trained 1,797 officers and 11,668 enlisted men across 44 squadrons at the Motor Torpedo Boat Squadrons Training Center (MTBSTC) in Melville, Rhode Island — the only PT boat training facility in the United States. Established February 17, 1942, under Lt. William C. Specht (trainees called it "Specht Tech"), the base grew to 59 buildings and 150 Quonset huts with a boat basin literally carved from a swamp. Covers the three-month training course (one month aboard a PT boat), gunnery training at the Anti-Aircraft Center at Price's Neck, Newport, the transition from peacetime Ivy League yachtsmen to wartime draftees, and the training mishaps that make great stories (PT-122 nearly sank after straying into a torpedo test range; PT-59 accidentally launched a torpedo that traveled seven miles and hit the cargo ship USS Capella). Notable alumni included JFK (entered September 27, 1942, completed December 2), plus a future Supreme Court justice, three movie stars, five ambassadors, four NFL coaches, and a U.S. attorney general.
 
-**Why it fills a gap:** Melville has never been the subject of a dedicated book. Every PT boat crew that went to war passed through this small Rhode Island town, yet the training experience is at most a paragraph in existing works. The story connects to broader themes: how the Navy improvised a training pipeline for an entirely new type of warfare.
+**Why it fills a gap:** Melville has never been the subject of a dedicated book. Every PT boat crew that went to war passed through this small Rhode Island town, yet the training experience is at most a paragraph in existing works. The cast of characters alone — from JFK to future movie stars and Supreme Court justices — would sustain a book, and the story connects to broader themes: how the Navy improvised a training pipeline for an entirely new type of warfare from scratch in months.
 
 **Estimated length:** 75,000 words + 40 photographs
 
@@ -89,9 +96,9 @@ Each entry below includes: title, subtitle, scope, why it fills a gap, estimated
 
 **Subtitle:** *How the Mosquito Fleet Reinvented Itself at Sea, 1941–1945*
 
-**Scope:** The dramatic transformation of the PT boat from a single-purpose torpedo craft to a multi-role gunboat bristling with weapons. Traces the evolution from the original four-torpedo configuration through the addition of 20mm and 40mm guns, .50 caliber mounts, depth charges, rocket launchers, and smoke generators. Covers the critical role of field modifications by squadron personnel, the influence of combat experience on official weapons changes, and the parallel development of radar and fire control.
+**Scope:** The dramatic transformation of the PT boat from a single-purpose torpedo craft to a multi-role gunboat bristling with weapons. Standard armament began with 2–4 Mark 8 torpedoes (2,600 lbs, 466-lb TNT warhead), twin .50 cal M2 machine guns, and 20mm Oerlikon cannons. Crews then scavenged 37mm M4 cannons from crashed P-39 Airacobra fighters on Guadalcanal — so effective they were later factory-installed. JFK's PT-109 had an Army M3 37mm anti-tank gun lashed to the bow. 40mm Bofors guns (120 rpm) became standard additions. By war's end, two eight-cell Mark 50 rocket launchers firing 5-inch spin-stabilized rockets (11,000-yard range) gave PT boats 16 rockets plus 16 reloads — matching a destroyer's 5-inch broadside. Raytheon SO radar (17 nm range) provided decisive advantage in night engagements. The result: by 1945, PT boats had more firepower per ton than any other vessel in the U.S. Navy. Also covers torpedo tubes replaced by lightweight racks, engines upgraded from 1,100 hp to 1,500 hp, depth charges, naval mines, and smoke generators.
 
-**Why it fills a gap:** The weapons evolution story is one of the most technically fascinating aspects of PT boat history, yet it exists only in fragments across other books. The PT boat's transformation from torpedo boat to gunboat was driven by the practical failure of torpedo tactics against maneuvering targets and the discovery that PT boats were far more effective as close-range gunfighters and interdiction platforms. This is a story of tactical adaptation under fire.
+**Why it fills a gap:** The weapons evolution story is one of the most technically fascinating aspects of PT boat history, yet it exists only in fragments across other books. The PT boat's transformation was driven by the practical failure of torpedo tactics against shallow-draft targets (10-ft minimum depth settings against barges drawing 5 ft) and the discovery that PT boats were far more effective as close-range gunfighters and interdiction platforms. The field modification story — crews literally pulling guns off crashed aircraft — is one of the great improvisation narratives of the war.
 
 **Estimated length:** 80,000 words + 55 photographs + technical diagrams
 
@@ -173,9 +180,9 @@ Each entry below includes: title, subtitle, scope, why it fills a gap, estimated
 
 **Subtitle:** *Foreign Navies, Coast Guard Service, Korean War, and the Surviving Boats*
 
-**Scope:** What happened to America's 800+ PT boats after V-J Day. Covers the mass disposal program, the boats transferred to foreign navies (South Korea, Norway, Soviet Union under Lend-Lease, various South American navies), the handful retained for post-war use, the Korean War-era reactivation of motor torpedo boat capability, and the long twilight of surviving PT boats. Ends with the preservation stories of PT-617 (at Battleship Cove), PT-796 (at Battleship Cove), and PT-658 (restored to running condition in Portland, Oregon).
+**Scope:** What happened to America's 800+ PT boats after V-J Day. Overseas boats were stripped and burned — 121 boats destroyed at PT Base 17 on Samar, Philippines alone. Boats returned to the U.S. were sold for trivial sums (PT-305 sold for $10 in 1948). Civilian conversions ranged from tour boats and fishing charters to oyster boats and yachts — PT-615 became a yacht leased to Clark Gable ("Tarbaby VI"); Howard Hughes purchased PT-694, later used in the McHale's Navy TV show. Covers the 146 boats built specifically for Lend-Lease export (the Soviet Navy received approximately 90 Vosper 70-ft types, Higgins 78-ft, and 60 Elco 80-ft boats — these Western designs influenced postwar Soviet torpedo boat development). Ends with the preservation stories of surviving museum boats: PT-305 "Sudden Jerk" (National WWII Museum, restored and seaworthy), PT-309 "Oh Frankie!" (Fredericksburg, TX), PT-617 and PT-796 (Battleship Cove — PT-796 was repainted as PT-109 for JFK's 1961 inauguration), PT-658 (Portland, OR, fully operational, National Register of Historic Places since 2012), and PT-728 (Liberty Aviation Museum, the only surviving U.S.-built Vosper design).
 
-**Why it fills a gap:** The post-war story of PT boats is essentially untold. Most readers assume the boats were simply scrapped (many were), but the full story involves Cold War naval aid, foreign service in conflicts from Korea to Southeast Asia, and a preservation movement that has saved a handful of boats for future generations. The PT-658 restoration story alone is remarkable—a complete, running PT boat restored by volunteers over two decades.
+**Why it fills a gap:** The post-war story of PT boats is essentially untold. Most readers assume the boats were simply scrapped (many were), but the full story involves Cold War Lend-Lease politics, Soviet reverse-engineering of American designs, celebrity civilian owners, and a preservation movement that has saved a handful of boats for future generations. The contrast between $10 surplus sales and multimillion-dollar restorations decades later is a story about how a nation remembers — and forgets — its wars.
 
 **Estimated length:** 80,000 words + 50 photographs
 
@@ -194,7 +201,7 @@ Each entry below includes: title, subtitle, scope, why it fills a gap, estimated
 
 **Subtitle:** *Agent Insertion, Coastwatcher Support, and Clandestine Warfare*
 
-**Scope:** The classified and little-known role of PT boats in intelligence and special operations throughout the war. Covers coastwatcher evacuation and supply missions in the Solomons, agent insertion and extraction along enemy-held coastlines, cooperation with OSS and Allied intelligence services in the Mediterranean, reconnaissance missions behind enemy lines, and the rescue of downed airmen and stranded personnel. These missions rarely appear in official action reports and have been reconstructed from personal accounts and declassified intelligence records.
+**Scope:** The classified and little-known role of PT boats in intelligence and special operations throughout the war. In the Mediterranean, Squadron 15 conducted multiple OSS missions landing agents on the west coast of Sardinia and northwest coast of Sicily; OSS operatives used PT boats to reach Capri, where they met sympathetic Italian admirals and anti-fascist scientists and learned about German radio-guided bombs and Italian magnetic torpedoes. Corsica — 35 miles from the Italian mainland — became a departure point for fast-boat infiltration of SO and SI agents into central and northern Italy. In the Pacific/Burma theater, the OSS Maritime Unit's "Flotilla Officer Commander" conducted 36+ missions across the Bay of Bengal, ferrying swimmer teams and rescuing 220+ downed airmen. The OSS Maritime Unit pioneered swim fins, face masks, and closed-circuit diving equipment — laying groundwork for modern Navy SEAL operations. Also covers coastwatcher evacuation in the Solomons and Lt. Comdr. Murray Preston's Medal of Honor action using PT-363 and PT-489 to rescue a downed aviator under fire in Wasile Bay off Halmahera Island.
 
 **Why it fills a gap:** This is essentially virgin territory. The intelligence and special operations role of PT boats is mentioned in passing in a few books but has never been systematically researched. PT boats' speed, shallow draft, and ability to operate close inshore at night made them ideal platforms for clandestine missions, and they were used far more extensively in this role than the public record suggests.
 
@@ -215,7 +222,7 @@ Each entry below includes: title, subtitle, scope, why it fills a gap, estimated
 
 **Subtitle:** *How the Navy Kept PT Boats Fighting from Tulagi to Cherbourg*
 
-**Scope:** The untold logistics story: how the Navy established, supplied, and maintained PT boat bases across two oceans. Covers the PT boat tenders (AGP—converted yachts and purpose-built vessels), the Seabee-built advanced bases, the parts shortages and field-expedient repairs, fuel supply challenges, and the daily grind of keeping wooden boats operational in combat zones. Features the remarkable stories of individual bases from Tulagi to Rendova, Dreger Harbor to Samar, Bizerte to Bastia.
+**Scope:** The untold logistics story: how the Navy established, supplied, and maintained PT boat bases across two oceans. Centers on the PT boat tenders (AGP classification) — USS Niagara (AGP-1), USS Oyster Bay (AGP-6) and the Oyster Bay-class vessels (modified Barnegat-class, 2,500 tons, 311 ft, capable of operating in 12 feet of water, carrying 48 replacement torpedoes with expanded engine repair shops). Covers the Seabee-built advanced bases, the hull construction that enabled field repair (two diagonal layers of 1-inch mahogany planking with canvas and glue between, held by bronze screws and copper rivets — specifically chosen for repairability), parts shortages and field-expedient repairs, fuel supply challenges for the three Packard engines consuming enormous amounts of high-octane gasoline, and the 1,200-mile self-powered PT movement from New Guinea to Leyte Gulf — the largest such movement of the war, requiring fuel shuttles from tenders supplied by tankers.
 
 **Why it fills a gap:** Every PT boat book mentions the bases in passing, but the logistics infrastructure that made PT operations possible has never been given dedicated treatment. This is the story of the motor machinists, shipfitters, Seabees, and supply officers who kept the boats running—often with nothing more than ingenuity and scrounged parts.
 
