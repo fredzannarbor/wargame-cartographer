@@ -5,6 +5,8 @@
 
 Each entry below includes: title, subtitle, scope, why it fills a gap, estimated word count, key primary sources, and photo source strategy.
 
+**Essential baseline reference:** Bulkley's *At Close Quarters: PT Boats in the United States Navy* (1962) — the official Navy history, available in full text at ibiblio.org/hyperwar/USN/CloseQuarters/. Every book in this series must surpass Bulkley's treatment of its subject in depth, narrative quality, and primary-source diversity.
+
 ---
 
 ## Book 1: PT BOATS IN THE MEDITERRANEAN — The Forgotten Mosquito Fleet
@@ -46,7 +48,7 @@ Each entry below includes: title, subtitle, scope, why it fills a gap, estimated
 
 **Scope:** The complete industrial and engineering history of PT boat design and construction. From the 1938 design competition through the wartime production surge. Covers all three primary builders—Electric Launch Company (Elco) of Bayonne, NJ; Higgins Industries of New Orleans, LA; and Huckins Yacht Corporation of Jacksonville, FL—plus the experimental and one-off designs. Includes the British Power Boat Company influence, the Packard marine engine story, and the evolution from 77-foot Elco boats to the definitive 80-foot Elco and 78-foot Higgins designs.
 
-**Why it fills a gap:** No book has treated PT boat construction as a standalone industrial narrative. The rivalry between Elco and Higgins, the political maneuvering by Andrew Jackson Higgins, the engineering challenges of planing hulls at 40+ knots, and the production statistics make a compelling story that bridges military and business history.
+**Why it fills a gap:** Frank J. Andruss Sr. covered the factual/technical construction story across three books (*Building the PT Boats*, *PT Boats Behind the Scenes*, *Pieces of History*), but his work is reference-oriented, not narrative. No book has told the PT boat construction story as a dramatic industrial narrative—the Elco-vs-Higgins rivalry, Andrew Jackson Higgins's political maneuvering and congressional lobbying, the engineering challenges of planing hulls at 40+ knots, the human drama of wartime production under impossible deadlines. This book is to Andruss what *Freedom's Forge* (Arthur Herman) was to the dry production statistics of WWII industry.
 
 **Estimated length:** 85,000 words + 60 photographs + engineering drawings
 

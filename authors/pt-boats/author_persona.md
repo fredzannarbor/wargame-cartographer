@@ -42,17 +42,20 @@ Target publishers: Naval Institute Press, Osprey Publishing, Stackpole Books, Ca
 ## Gap Analysis: What Has NOT Been Well Covered
 
 ### Existing PT Boat Literature — Well-Covered Topics
-- **PT-109 / JFK**: Donovan, Doyle, Cluster & Halperin — exhaustively covered
-- **General Pacific operations**: Bulkley's *At Close Quarters* (the official Navy history), Breuer's *Sea Wolf*, Johnson's works
-- **Guadalcanal/Solomon Islands**: Keresey's *PT 105*, Donovan, multiple personal accounts
-- **General overviews**: Chun's Osprey volumes, Johnson's *United States PT-Boats of World War II in Action*
-- **Personal memoirs**: Walling's *Bloodstained Sea*, White's *They Were Expendable*
+- **PT-109 / JFK**: Donovan (1961), Doyle (2015), Ballard (2002), Hersey (1944 *New Yorker*) — exhaustively covered
+- **Official/comprehensive histories**: Bulkley's *At Close Quarters* (1962, the definitive official Navy history, full text on HyperWar), Nelson's *Hunters in the Shallows* (1998, critical/revisionist)
+- **General Pacific operations**: Breuer's *Sea Wolf*, Johnson's *PT-Boats of WWII in Action*, Connelly's five books
+- **Guadalcanal/Solomon Islands**: Keresey's *PT 105*, extensively in *At Close Quarters*, part of most general histories
+- **Philippines / MacArthur escape**: White's *They Were Expendable* (1942), Domagalski's *Under a Blood Red Sun* (2016)
+- **Construction and technical details**: Frank J. Andruss Sr.'s three books (*Building the PT Boats*, *PT Boats Behind the Scenes*, *Pieces of History*), Connelly's variant-by-variant analysis
+- **Illustrated references**: Chun's *American PT Boats in WWII* (Schiffer), Doyle's Legends of Warfare volume, Rottman's Osprey New Vanguard
+- **Base infrastructure (encyclopedic)**: Barbin's *Beachheads Secured* (Vols. I & II) — covers all 873 boats, 130 bases, 19 tenders, 56 squadrons
 
 ### Identified Gaps — Underexplored or Uncovered Topics
 
 1. **Mediterranean Theater in depth** — No single comprehensive volume covers the full arc from North Africa through Southern France. Bulkley covers it in chapters, but there is no dedicated theater-level treatment.
 
-2. **PT boat construction and industrial history** — The Elco, Higgins, and Huckins story as an industrial/engineering narrative has never been told as a standalone book. The design competition, production challenges, and evolution of the boats themselves deserve full treatment.
+2. **PT boat construction as narrative industrial history** — While Andruss covered the technical/factual construction story thoroughly, no one has told it as a narrative industrial history: the Elco-vs-Higgins rivalry, Andrew Jackson Higgins's political maneuvering, the human drama of the wartime production surge. Andruss is reference; the narrative is untold.
 
 3. **Weapons and technology evolution** — The transformation from torpedo boats to multi-role gunboats is only touched on in passing in existing works. The radar story, rocket launchers, and field modifications deserve dedicated coverage.
 
@@ -73,3 +76,11 @@ Target publishers: Naval Institute Press, Osprey Publishing, Stackpole Books, Ca
 11. **Intelligence and special operations** — PT boats in clandestine roles: agent insertion, coastwatcher support, reconnaissance missions.
 
 12. **The human cost** — Casualty analysis, medical care, combat fatigue, and the PT boat veterans' post-war experience.
+
+13. **English Channel / D-Day operations** — Bulkeley's return to command PT operations at Normandy, the E-boat threat, the Mason Line screen. Covered only as a chapter in *At Close Quarters* (Part VII), never standalone.
+
+14. **Comparative international analysis** — No systematic comparison of American PTs with British MTBs, Italian MAS boats, and German Schnellboote (S-boats/E-boats) in a unified analytical framework.
+
+15. **Enlisted crew perspectives** — Almost all published memoirs are from officers. Gunners, torpedomen, motor machinists, and radiomen are virtually unrepresented. Even *At Close Quarters* was criticized for having crew voices "few and far between."
+
+16. **Aleutian Islands operations** — Mentioned in passing in general histories, never given dedicated treatment.
