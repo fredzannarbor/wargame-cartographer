@@ -77,14 +77,46 @@ The good news: the vast majority of WWII-era PT boat photographs were taken by U
 - **Rights:** NavSource itself does not hold rights; it indexes and credits sources. Use it as a **finding aid** to locate originals at NARA/NHHC, then obtain publication-quality scans from the original repository.
 - **Tip:** Invaluable for identifying which photos exist for specific boats. Start here for research, then go to the source for high-resolution scans.
 
-### 6. Wikimedia Commons
+### 6. National WWII Museum (New Orleans)
+
+- Owns restored **PT-305** — the world's only operational combat-veteran PT boat (Mediterranean, RON 22)
+- Digital collections at ww2online.org include the **Joe Cirlot collection** (PT-305/RON 22) with crew photos from Corsica and Leghorn (Livorno), Italy
+- Photos showing RON 22 insignia and kill markings (swastikas for sunken German craft)
+- Media/restoration images available for editorial use
+- Essential for Book 1 (Mediterranean) and Book 2 (Construction)
+
+### 7. U.S. Naval War College Archives — Edward J. Pope Jr. Papers
+
+- Public domain collection of photographs from a PT boat officer who served at Guadalcanal and in the Philippines
+- Includes photos of PT boats, crew, and locals
+- Access via usnwcarchives.org
+
+### 8. Internet Archive — WWII PT Boat Films
+
+- Free downloadable WWII-era films featuring PT boats:
+  - "Giant Killers" — Elco PT boat promotional film (color)
+  - "PT Boat Activities & Night Action Off New Guinea 1943"
+- Film stills can supplement photo sections (public domain)
+
+### 9. National Museum of the Pacific War (Fredericksburg, TX)
+
+- Holds **PT-309** (one of few surviving Higgins PT boats)
+- Multiple donated photo collections related to PT boats in the Pacific Theater
+- Contact for research access to donated collections
+
+### 10. JFK Presidential Library
+
+- Photographs and documents related to PT-109 and JFK's Solomon Islands service
+- Relevant primarily as context/supplementary material (the PT-109 story itself is well-covered)
+
+### 11. Wikimedia Commons
 
 - Extensive collection of NARA/NHHC PT boat photos already uploaded at high resolution
 - All clearly marked as public domain
 - Good for quick reference; verify against NARA originals for publication-quality versions
 - Search: commons.wikimedia.org, keywords "PT boat," "motor torpedo boat," specific hull numbers
 
-### 7. Fold3 (Ancestry.com)
+### 12. Fold3 (Ancestry.com)
 
 - NARA military records digitization partner
 - Some PT boat action reports and photos digitized
@@ -152,5 +184,7 @@ The good news: the vast majority of WWII-era PT boat photographs were taken by U
 2. **NHHC Photographic Section** — For ongoing research access
 3. **NARA Still Picture Branch** — For high-resolution scan orders
 4. **NavSource webmaster** — For photo identification assistance
-5. **National WWII Museum** — For Higgins Industries material (Book 2)
+5. **National WWII Museum** — For Higgins Industries material (Book 2) AND PT-305/Joe Cirlot Mediterranean collection (Book 1)
 6. **PT-658 Heritage Museum, Portland, OR** — For restoration/post-war content (Book 8)
+7. **U.S. Naval War College Archives** — Edward J. Pope Jr. Papers (Guadalcanal/Philippines photos)
+8. **National Museum of the Pacific War, Fredericksburg, TX** — PT-309 and donated Pacific collections
